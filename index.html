@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visor CSV Pro - Filtros encadenados</title>
+    <title>Visor CSV Pro - Orden con botón</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js">
+    </script>
     <style>
         /* ===== RESET Y VARIABLES ===== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         :root {
             --primary: #7c3aed;
             --primary-light: #ede9fe;
@@ -22,7 +27,8 @@
             --shadow: 0 10px 40px rgba(124, 58, 237, 0.08);
             --radius: 16px;
         }
-        html, body {
+        html,
+        body {
             height: 100%;
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
@@ -54,7 +60,9 @@
             color: var(--text);
             margin: 0;
         }
-        .header-left h1 span { color: var(--primary); }
+        .header-left h1 span {
+            color: var(--primary);
+        }
         .header-left .sub {
             font-size: 0.85rem;
             color: var(--text-light);
@@ -79,12 +87,16 @@
             border-color: var(--primary);
             background: var(--primary-light);
         }
-        .upload input { display: none; }
+        .upload input {
+            display: none;
+        }
         .upload-label {
             font-weight: 500;
             color: var(--text);
         }
-        .upload-label strong { color: var(--primary); }
+        .upload-label strong {
+            color: var(--primary);
+        }
         .file-name {
             color: var(--text-light);
             font-size: 0.85rem;
@@ -203,22 +215,43 @@
             letter-spacing: 0.3px;
             white-space: nowrap;
         }
-        .sort-select {
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+        /* ===== BOTÓN DE ORDEN (3 ESTADOS) ===== */
+        .sort-btn {
             background: white;
-            color: var(--text);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
             cursor: pointer;
-            outline: none;
             transition: 0.15s;
-            min-width: 80px;
+            min-width: 70px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-family: 'Inter', sans-serif;
         }
-        .sort-select:focus {
+        .sort-btn:hover {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+            color: var(--primary);
+            background: var(--primary-light);
         }
+        .sort-btn.state-asc {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+        .sort-btn.state-desc {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fee2e2;
+        }
+        .sort-btn .icon {
+            font-size: 0.9rem;
+        }
+
         .filter-select {
             width: 100%;
             padding: 6px 10px;
@@ -245,6 +278,7 @@
         .filter-select:hover {
             border-color: var(--primary);
         }
+
         td {
             padding: 8px 12px;
             border-bottom: 1px solid #f3f4f6;
@@ -255,7 +289,9 @@
             color: var(--text);
             text-align: left;
         }
-        tr:hover td { background: #fafafa; }
+        tr:hover td {
+            background: #fafafa;
+        }
         .footer {
             flex-shrink: 0;
             text-align: center;
@@ -271,356 +307,498 @@
             min-height: 0;
             flex-direction: column;
         }
-        #filterNote { display: none; }
+        #filterNote {
+            display: none;
+        }
 
         @media (max-width: 640px) {
-            .app { padding: 12px; }
-            .header { padding: 12px 16px; }
-            .header-left h1 { font-size: 1.2rem; }
-            th { padding: 6px 6px; }
-            td { padding: 4px 6px; font-size: 0.7rem; }
-            .filter-select { font-size: 0.65rem; min-width: 60px; max-width: 100px; padding: 3px 6px; }
-            .sort-select { font-size: 0.6rem; min-width: 60px; padding: 2px 4px; }
-            .upload { padding: 4px 12px; }
-            .upload-label { font-size: 0.75rem; }
+            .app {
+                padding: 12px;
+            }
+            .header {
+                padding: 12px 16px;
+            }
+            .header-left h1 {
+                font-size: 1.2rem;
+            }
+            th {
+                padding: 6px 6px;
+            }
+            td {
+                padding: 4px 6px;
+                font-size: 0.7rem;
+            }
+            .filter-select {
+                font-size: 0.65rem;
+                min-width: 60px;
+                max-width: 100px;
+                padding: 3px 6px;
+            }
+            .sort-btn {
+                font-size: 0.7rem;
+                padding: 2px 8px;
+                min-width: 60px;
+            }
+            .upload {
+                padding: 4px 12px;
+            }
+            .upload-label {
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="app">
-    <div class="header">
-        <div class="header-left">
-            <h1>📊 <span>Visor</span> CSV</h1>
-            <div class="sub">Filtros encadenados – elige marca y solo verás sus modelos</div>
-        </div>
-        <div class="header-actions">
-            <div class="upload" id="uploadArea">
-                <div class="upload-label">📂 <strong>Selecciona</strong> CSV</div>
-                <input type="file" id="fileInput" accept=".csv" />
-                <span class="file-name" id="fileName"></span>
+    <div class="app">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <h1>📊 <span>Visor</span> CSV</h1>
+                <div class="sub">Orden con botón (3 estados) y agrupación mejorada</div>
             </div>
-            <button class="btn-clear" id="restoreFilters">✕ Limpiar filtros</button>
+            <div class="header-actions">
+                <div class="upload" id="uploadArea">
+                    <div class="upload-label">📂 <strong>Selecciona</strong> CSV</div>
+                    <input type="file" id="fileInput" accept=".csv" />
+                    <span class="file-name" id="fileName"></span>
+                </div>
+                <button class="btn-clear" id="restoreFilters">✕ Limpiar filtros</button>
+            </div>
         </div>
+
+        <!-- NOTAS -->
+        <div id="filterNote" class="note">
+            ⚡ Columnas: <strong id="shownColumnsList"></strong>
+        </div>
+        <div id="warningMessage" class="warning">⚠️ Más de 5000 filas – puede ser lento.</div>
+
+        <!-- TABLA -->
+        <div id="tableContainer">
+            <div class="info-bar">
+                <span>📌 <span id="rowCount" class="badge">0</span> filas</span>
+                <span class="hint" id="filterHint">🔄 Usa los desplegables para filtrar</span>
+            </div>
+            <div class="table-wrap" id="tableWrapper">
+                <!-- Generado por JS -->
+            </div>
+        </div>
+
+        <div class="footer">Hecho con ❤️ – botón de orden: Original → ▲ Asc → ▼ Desc</div>
     </div>
 
-    <div id="filterNote" class="note">
-        ⚡ Columnas: <strong id="shownColumnsList"></strong>
-    </div>
-    <div id="warningMessage" class="warning">⚠️ Más de 5000 filas – puede ser lento.</div>
-
-    <div id="tableContainer">
-        <div class="info-bar">
-            <span>📌 <span id="rowCount" class="badge">0</span> filas</span>
-            <span class="hint" id="filterHint">🔄 Usa los desplegables para filtrar</span>
-        </div>
-        <div class="table-wrap" id="tableWrapper">
-            <!-- Generado por JS -->
-        </div>
-    </div>
-
-    <div class="footer">Hecho con ❤️ – filtros que se actualizan solos</div>
-</div>
-
-<script>
-    (function() {
-        // ===== CONFIGURACIÓN =====
-        const TARGET_COLUMNS = [
-            'stock_brand', 'stock_model_version', 'stock_version', 'stock_domain',
-            'stock_used_year', 'stock_color', 'stock_vehicle_kms', 'stock_location'
-        ];
-        const DISPLAY_NAMES = {
-            'stock_brand': 'Marca',
-            'stock_model_version': 'Modelo',
-            'stock_version': 'Versión',
-            'stock_domain': 'Patente',
-            'stock_used_year': 'Año',
-            'stock_color': 'Color',
-            'stock_vehicle_kms': 'kms',
-            'stock_location': 'Ubicación'
-        };
-
-        // ===== NORMALIZACIÓN PARA AGRUPAR =====
-        function normalizeGroup(text) {
-            if (!text) return '';
-            let s = String(text).trim().toLowerCase();
-            s = s.replace(/[^a-z0-9\s]/g, ' ');
-            const remove = ['usado', 'usados', '0km', 'modelo', 'version', 'full', 'base', 'plus', 'hyundai'];
-            remove.forEach(w => s = s.replace(new RegExp('\\b' + w + '\\b', 'g'), ''));
-            s = s.replace(/\s+/g, ' ').trim();
-            const synonyms = {
-                'vw': 'volkswagen',
-                'volkswagen': 'volkswagen',
-                'ford': 'ford',
-                'toyota': 'toyota',
-                'chevrolet': 'chevrolet',
-                'chevy': 'chevrolet',
-                'renault': 'renault',
-                'peugeot': 'peugeot',
-                'citroen': 'citroen',
-                'fiat': 'fiat',
-                'jeep': 'jeep',
-                'nissan': 'nissan',
-                'hyundai': 'hyundai',
-                'triumph': 'triumph',
-                'dodge': 'dodge',
-                'cherry': 'cherry',
-                'kangoo': 'renault'
+    <script>
+        (function() {
+            // ===== CONFIGURACIÓN =====
+            const TARGET_COLUMNS = [
+                'stock_brand', 'stock_model_version', 'stock_version', 'stock_domain',
+                'stock_used_year', 'stock_color', 'stock_vehicle_kms', 'stock_location'
+            ];
+            const DISPLAY_NAMES = {
+                'stock_brand': 'Marca',
+                'stock_model_version': 'Modelo',
+                'stock_version': 'Versión',
+                'stock_domain': 'Patente',
+                'stock_used_year': 'Año',
+                'stock_color': 'Color',
+                'stock_vehicle_kms': 'kms',
+                'stock_location': 'Ubicación'
             };
-            if (synonyms[s]) return synonyms[s];
-            for (let key in synonyms) {
-                if (s.includes(key)) return synonyms[key];
-            }
-            return s;
-        }
 
-        function cleanText(str) {
-            if (!str) return '';
-            let s = String(str).trim();
-            const corrections = {
-                'biarco': 'blanco',
-                'blanca': 'blanco',
-                'gris plata': 'gris plata',
-                'plateado': 'gris plata',
-                'moreno': 'negro',
-                'amarón': 'marrón',
-                'marron': 'marrón'
-            };
-            const lower = s.toLowerCase();
-            if (corrections[lower]) return corrections[lower];
-            return s;
-        }
+            // ===== NORMALIZACIÓN AVANZADA PARA AGRUPAR =====
+            function normalizeGroup(text) {
+                if (!text) return '';
+                let s = String(text).trim().toLowerCase();
 
-        // ===== DOM =====
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const fileName = document.getElementById('fileName');
-        const tableContainer = document.getElementById('tableContainer');
-        const tableWrapper = document.getElementById('tableWrapper');
-        const filterNote = document.getElementById('filterNote');
-        const shownColumnsList = document.getElementById('shownColumnsList');
-        const warningMessage = document.getElementById('warningMessage');
-        const restoreFiltersBtn = document.getElementById('restoreFilters');
-        const rowCount = document.getElementById('rowCount');
-        const filterHint = document.getElementById('filterHint');
+                // 1. Eliminar caracteres especiales y palabras irrelevantes
+                s = s.replace(/[^a-z0-9\s]/g, ' ');
+                const removeWords = [
+                    'usado', 'usados', '0km', 'modelo', 'version', 'full', 'base', 'plus',
+                    'hyundai', 'hibrida', 'hibrid', 'mt', 'm/t', 'at', 'a/t', 's', 'n',
+                    '1.5l', '1.6l', '2.0l', 'titanium', 'sense', 'exclusive', 'pure drive'
+                ];
+                removeWords.forEach(w => {
+                    s = s.replace(new RegExp('\\b' + w + '\\b', 'g'), '');
+                });
 
-        let allData = [];
-        let currentHeaders = [];
-        let visibleHeaders = [];
-        let sortState = { column: null, direction: null };
-        let activeFilters = {};       // { columna: valorSeleccionado }
+                // 2. Limpiar espacios extra
+                s = s.replace(/\s+/g, ' ').trim();
 
-        // Almacenar los valores únicos (sin filtrar) para cada columna
-        let allUniqueValues = {};
+                // 3. Mapeo de sinónimos (marcas y modelos)
+                const synonyms = {
+                    // Marcas
+                    'vw': 'volkswagen',
+                    'volkswagen': 'volkswagen',
+                    'ford': 'ford',
+                    'toyota': 'toyota',
+                    'chevrolet': 'chevrolet',
+                    'chevy': 'chevrolet',
+                    'renault': 'renault',
+                    'peugeot': 'peugeot',
+                    'citroen': 'citroen',
+                    'fiat': 'fiat',
+                    'jeep': 'jeep',
+                    'nissan': 'nissan',
+                    'hyundai': 'hyundai',
+                    'triumph': 'triumph',
+                    'dodge': 'dodge',
+                    'cherry': 'cherry',
+                    'kangoo': 'renault',
+                    // Modelos comunes
+                    'kuga': 'kuga',
+                    'ecosport': 'ecosport',
+                    'ranger': 'ranger',
+                    'focus': 'focus',
+                    'territory': 'territory',
+                    'bronco': 'bronco',
+                    'ka': 'ka',
+                    'note': 'note',
+                    'gol': 'gol',
+                    'trend': 'gol trend'
+                };
 
-        // ===== EVENTOS DE CARGA =====
-        uploadArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFile);
+                if (synonyms[s]) return synonyms[s];
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#7c3aed';
-            uploadArea.style.background = '#ede9fe';
-        });
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = '#e5e7eb';
-            uploadArea.style.background = 'white';
-        });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#e5e7eb';
-            uploadArea.style.background = 'white';
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleFile();
-            }
-        });
-
-        restoreFiltersBtn.addEventListener('click', function() {
-            // Resetear todos los filtros
-            document.querySelectorAll('.filter-select').forEach(sel => sel.value = '');
-            activeFilters = {};
-            this.style.display = 'none';
-            filterHint.textContent = '🔄 Usa los desplegables para filtrar';
-            // Reconstruir opciones de filtros (todas)
-            updateFilterOptions();
-            applyFiltersAndRender();
-        });
-
-        // ===== PROCESAR ARCHIVO =====
-        function handleFile() {
-            const file = fileInput.files[0];
-            if (!file) return;
-            if (!file.name.toLowerCase().endsWith('.csv')) {
-                alert('Selecciona un archivo .csv');
-                fileInput.value = '';
-                return;
-            }
-            fileName.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-            warningMessage.style.display = 'none';
-
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                trimHeaders: true,
-                dynamicTyping: true,
-                complete: function(results) {
-                    if (results.errors.length) console.warn('Errores:', results.errors);
-                    if (!results.data || results.data.length === 0) {
-                        alert('El CSV está vacío o no tiene encabezados.');
-                        return;
+                // Buscar si alguna clave está contenida en el texto
+                for (let key in synonyms) {
+                    if (s.includes(key)) {
+                        return synonyms[key];
                     }
-                    if (results.data.length > 5000) warningMessage.style.display = 'block';
+                }
 
-                    const allHeaders = results.meta.fields || Object.keys(results.data[0]);
-                    const targetLower = TARGET_COLUMNS.map(c => c.toLowerCase());
-                    const filteredHeaders = allHeaders.filter(h => targetLower.includes(h.toLowerCase()));
-
-                    if (filteredHeaders.length === 0) {
-                        alert('No se encontraron las columnas esperadas.\nBuscadas: ' + TARGET_COLUMNS.join(', '));
-                        return;
+                // Si es un modelo que termina en número (ej. "focus 1.6") quedarse solo con el nombre
+                const modelMatch = s.match(/^([a-z]+)/);
+                if (modelMatch) {
+                    const base = modelMatch[1];
+                    // Si el base es una marca conocida, devolverlo
+                    if (['ford', 'nissan', 'renault', 'volkswagen', 'toyota', 'chevrolet', 'hyundai', 'jeep', 'fiat',
+                            'peugeot', 'citroen', 'dodge', 'triumph', 'cherry'
+                        ].includes(base)) {
+                        return base;
                     }
+                    // Si no, devolver el texto limpio
+                    return s;
+                }
 
-                    const displayList = filteredHeaders.map(h => DISPLAY_NAMES[h] || h).join(', ');
-                    shownColumnsList.textContent = displayList;
-                    filterNote.style.display = 'block';
+                return s;
+            }
 
-                    // Limpiar datos
-                    allData = results.data.map(row => {
-                        const newRow = {};
-                        filteredHeaders.forEach(h => {
-                            let val = row[h];
-                            if (typeof val === 'string') val = cleanText(val);
-                            newRow[h] = val;
-                        });
-                        return newRow;
-                    });
+            function cleanText(str) {
+                if (!str) return '';
+                let s = String(str).trim();
+                const corrections = {
+                    'biarco': 'blanco',
+                    'blanca': 'blanco',
+                    'gris plata': 'gris plata',
+                    'plateado': 'gris plata',
+                    'moreno': 'negro',
+                    'amarón': 'marrón',
+                    'marron': 'marrón'
+                };
+                const lower = s.toLowerCase();
+                if (corrections[lower]) return corrections[lower];
+                return s;
+            }
 
-                    currentHeaders = filteredHeaders;
-                    visibleHeaders = [...currentHeaders];
-                    sortState = { column: null, direction: null };
-                    activeFilters = {};
+            // ===== DOM =====
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const fileName = document.getElementById('fileName');
+            const tableContainer = document.getElementById('tableContainer');
+            const tableWrapper = document.getElementById('tableWrapper');
+            const filterNote = document.getElementById('filterNote');
+            const shownColumnsList = document.getElementById('shownColumnsList');
+            const warningMessage = document.getElementById('warningMessage');
+            const restoreFiltersBtn = document.getElementById('restoreFilters');
+            const rowCount = document.getElementById('rowCount');
+            const filterHint = document.getElementById('filterHint');
 
-                    // Calcular valores únicos (normalizados) para cada columna (sin filtros)
-                    allUniqueValues = {};
-                    currentHeaders.forEach(h => {
-                        const rawValues = allData.map(row => row[h]).filter(v => v !== null && v !== undefined && v !== '');
-                        const normalizedSet = new Set();
-                        rawValues.forEach(v => {
-                            const norm = normalizeGroup(String(v));
-                            if (norm) normalizedSet.add(norm);
-                        });
-                        allUniqueValues[h] = Array.from(normalizedSet).sort();
-                    });
+            let allData = [];
+            let currentHeaders = [];
+            let visibleHeaders = [];
+            // Estado de orden: { column: string | null, direction: 'asc' | 'desc' | null }
+            let sortState = { column: null, direction: null };
+            let activeFilters = {};
+            let allUniqueValues = {};
 
-                    buildTable(allData, visibleHeaders);
-                    tableContainer.style.display = 'flex';
-                    restoreFiltersBtn.style.display = 'inline-block';
-                },
-                error: function(error) {
-                    alert('Error al leer el archivo: ' + error.message);
+            // ===== EVENTOS DE CARGA =====
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFile);
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#7c3aed';
+                uploadArea.style.background = '#ede9fe';
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#e5e7eb';
+                uploadArea.style.background = 'white';
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#e5e7eb';
+                uploadArea.style.background = 'white';
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFile();
                 }
             });
-        }
 
-        // ===== CONSTRUIR TABLA =====
-        function buildTable(data, visibleCols) {
-            let tableHtml = '<table><thead><tr>';
-            visibleCols.forEach(h => {
-                const displayName = DISPLAY_NAMES[h] || h;
-                tableHtml += `
-                    <th>
-                        <div class="col-header">
-                            <div class="col-top">
-                                <span>${displayName}</span>
-                                <select class="sort-select" data-column="${h}">
-                                    <option value="">Original</option>
-                                    <option value="asc">▲ Ascendente</option>
-                                    <option value="desc">▼ Descendente</option>
+            restoreFiltersBtn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-select').forEach(sel => sel.value = '');
+                activeFilters = {};
+                this.style.display = 'none';
+                filterHint.textContent = '🔄 Usa los desplegables para filtrar';
+                // Resetear botones de orden
+                document.querySelectorAll('.sort-btn').forEach(btn => {
+                    btn.className = 'sort-btn';
+                    btn.innerHTML = '<span class="icon">⇅</span> Original';
+                });
+                sortState = { column: null, direction: null };
+                updateFilterOptions();
+                applyFiltersAndRender();
+            });
+
+            // ===== PROCESAR ARCHIVO =====
+            function handleFile() {
+                const file = fileInput.files[0];
+                if (!file) return;
+                if (!file.name.toLowerCase().endsWith('.csv')) {
+                    alert('Selecciona un archivo .csv');
+                    fileInput.value = '';
+                    return;
+                }
+                fileName.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                warningMessage.style.display = 'none';
+
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    trimHeaders: true,
+                    dynamicTyping: true,
+                    complete: function(results) {
+                        if (results.errors.length) console.warn('Errores:', results.errors);
+                        if (!results.data || results.data.length === 0) {
+                            alert('El CSV está vacío o no tiene encabezados.');
+                            return;
+                        }
+                        if (results.data.length > 5000) warningMessage.style.display = 'block';
+
+                        const allHeaders = results.meta.fields || Object.keys(results.data[0]);
+                        const targetLower = TARGET_COLUMNS.map(c => c.toLowerCase());
+                        const filteredHeaders = allHeaders.filter(h => targetLower.includes(h.toLowerCase()));
+
+                        if (filteredHeaders.length === 0) {
+                            alert('No se encontraron las columnas esperadas.\nBuscadas: ' + TARGET_COLUMNS.join(
+                            ', '));
+                            return;
+                        }
+
+                        const displayList = filteredHeaders.map(h => DISPLAY_NAMES[h] || h).join(', ');
+                        shownColumnsList.textContent = displayList;
+                        filterNote.style.display = 'block';
+
+                        allData = results.data.map(row => {
+                            const newRow = {};
+                            filteredHeaders.forEach(h => {
+                                let val = row[h];
+                                if (typeof val === 'string') val = cleanText(val);
+                                newRow[h] = val;
+                            });
+                            return newRow;
+                        });
+
+                        currentHeaders = filteredHeaders;
+                        visibleHeaders = [...currentHeaders];
+                        sortState = { column: null, direction: null };
+                        activeFilters = {};
+
+                        allUniqueValues = {};
+                        currentHeaders.forEach(h => {
+                            const rawValues = allData.map(row => row[h]).filter(v => v !== null && v !==
+                                undefined && v !== '');
+                            const normalizedSet = new Set();
+                            rawValues.forEach(v => {
+                                const norm = normalizeGroup(String(v));
+                                if (norm) normalizedSet.add(norm);
+                            });
+                            allUniqueValues[h] = Array.from(normalizedSet).sort();
+                        });
+
+                        buildTable(allData, visibleHeaders);
+                        tableContainer.style.display = 'flex';
+                        restoreFiltersBtn.style.display = 'inline-block';
+                    },
+                    error: function(error) {
+                        alert('Error al leer el archivo: ' + error.message);
+                    }
+                });
+            }
+
+            // ===== CONSTRUIR TABLA =====
+            function buildTable(data, visibleCols) {
+                let tableHtml = '<table><thead><tr>';
+                visibleCols.forEach(h => {
+                    const displayName = DISPLAY_NAMES[h] || h;
+                    tableHtml += `
+                        <th>
+                            <div class="col-header">
+                                <div class="col-top">
+                                    <span>${displayName}</span>
+                                    <button class="sort-btn" data-column="${h}">
+                                        <span class="icon">⇅</span> Original
+                                    </button>
+                                </div>
+                                <select class="filter-select" data-column="${h}">
+                                    <option value="">Todos</option>
+                                    ${(allUniqueValues[h] || []).map(val => `<option value="${val}">${val}</option>`).join('')}
                                 </select>
                             </div>
-                            <select class="filter-select" data-column="${h}">
-                                <option value="">Todos</option>
-                                ${(allUniqueValues[h] || []).map(val => `<option value="${val}">${val}</option>`).join('')}
-                            </select>
-                        </div>
-                    </th>
-                `;
-            });
-            tableHtml += '</tr></thead><tbody id="tableBody">';
-            tableHtml += '</tbody></table>';
+                        </th>
+                    `;
+                });
+                tableHtml += '</tr></thead><tbody id="tableBody">';
+                tableHtml += '</tbody></table>';
 
-            tableWrapper.innerHTML = tableHtml;
+                tableWrapper.innerHTML = tableHtml;
 
-            // --- Eventos del selector de orden ---
-            document.querySelectorAll('.sort-select').forEach(sel => {
-                sel.addEventListener('change', function(e) {
-                    const col = this.dataset.column;
-                    const value = this.value;
-                    if (value !== '') {
-                        document.querySelectorAll('.sort-select').forEach(other => {
-                            if (other !== this) other.value = '';
+                // --- Eventos del botón de orden (3 estados) ---
+                document.querySelectorAll('.sort-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const col = this.dataset.column;
+                        // Ciclo de estados: Original → Asc → Desc → Original
+                        let nextState = 'original';
+                        if (sortState.column === col && sortState.direction === 'asc') {
+                            nextState = 'desc';
+                        } else if (sortState.column === col && sortState.direction === 'desc') {
+                            nextState = 'original';
+                        } else {
+                            nextState = 'asc';
+                        }
+
+                        // Resetear todos los botones a Original
+                        document.querySelectorAll('.sort-btn').forEach(b => {
+                            b.className = 'sort-btn';
+                            b.innerHTML = '<span class="icon">⇅</span> Original';
                         });
-                    }
-                    if (value === '') {
-                        sortState.column = null;
-                        sortState.direction = null;
-                    } else {
-                        sortState.column = col;
-                        sortState.direction = value;
-                    }
-                    applyFiltersAndRender();
+
+                        if (nextState === 'original') {
+                            sortState.column = null;
+                            sortState.direction = null;
+                            // El botón se queda en Original (ya lo reseteamos)
+                        } else {
+                            sortState.column = col;
+                            sortState.direction = nextState;
+                            // Marcar este botón
+                            if (nextState === 'asc') {
+                                this.className = 'sort-btn state-asc';
+                                this.innerHTML = '<span class="icon">▲</span> Ascendente';
+                            } else {
+                                this.className = 'sort-btn state-desc';
+                                this.innerHTML = '<span class="icon">▼</span> Descendente';
+                            }
+                        }
+
+                        applyFiltersAndRender();
+                    });
                 });
-            });
 
-            // --- Eventos de filtro ---
-            document.querySelectorAll('.filter-select').forEach(sel => {
-                sel.addEventListener('change', function(e) {
-                    const col = this.dataset.column;
-                    const val = this.value;
-                    if (val === '') delete activeFilters[col];
-                    else activeFilters[col] = val;
+                // --- Eventos de filtro ---
+                document.querySelectorAll('.filter-select').forEach(sel => {
+                    sel.addEventListener('change', function(e) {
+                        const col = this.dataset.column;
+                        const val = this.value;
+                        if (val === '') delete activeFilters[col];
+                        else activeFilters[col] = val;
 
-                    // Actualizar opciones de los demás filtros (encadenados)
-                    updateFilterOptions();
+                        updateFilterOptions();
 
-                    const hasFilter = Object.keys(activeFilters).length > 0;
-                    restoreFiltersBtn.style.display = hasFilter ? 'inline-block' : 'none';
-                    filterHint.textContent = hasFilter ? '✅ Filtros activos' : '🔄 Usa los desplegables para filtrar';
-                    applyFiltersAndRender();
+                        const hasFilter = Object.keys(activeFilters).length > 0;
+                        restoreFiltersBtn.style.display = hasFilter ? 'inline-block' : 'none';
+                        filterHint.textContent = hasFilter ? '✅ Filtros activos' :
+                            '🔄 Usa los desplegables para filtrar';
+                        applyFiltersAndRender();
+                    });
                 });
-            });
 
-            // Cargar estados guardados (si los hay)
-            document.querySelectorAll('.sort-select').forEach(sel => {
-                const col = sel.dataset.column;
-                if (sortState.column === col && sortState.direction) {
-                    sel.value = sortState.direction;
+                // Cargar estados guardados
+                if (sortState.column && sortState.direction) {
+                    document.querySelectorAll('.sort-btn').forEach(btn => {
+                        if (btn.dataset.column === sortState.column) {
+                            if (sortState.direction === 'asc') {
+                                btn.className = 'sort-btn state-asc';
+                                btn.innerHTML = '<span class="icon">▲</span> Ascendente';
+                            } else {
+                                btn.className = 'sort-btn state-desc';
+                                btn.innerHTML = '<span class="icon">▼</span> Descendente';
+                            }
+                        }
+                    });
                 }
-            });
-            document.querySelectorAll('.filter-select').forEach(sel => {
-                const col = sel.dataset.column;
-                if (activeFilters[col]) sel.value = activeFilters[col];
-            });
+                document.querySelectorAll('.filter-select').forEach(sel => {
+                    const col = sel.dataset.column;
+                    if (activeFilters[col]) sel.value = activeFilters[col];
+                });
 
-            applyFiltersAndRender();
-        }
+                applyFiltersAndRender();
+            }
 
-        // ===== ACTUALIZAR OPCIONES DE FILTROS (encadenados) =====
-        function updateFilterOptions() {
-            // Para cada columna, calcular los valores posibles dados los filtros activos (excepto el de sí misma)
-            currentHeaders.forEach(h => {
-                const select = document.querySelector(`.filter-select[data-column="${h}"]`);
-                if (!select) return;
+            // ===== ACTUALIZAR OPCIONES DE FILTROS (encadenados) =====
+            function updateFilterOptions() {
+                currentHeaders.forEach(h => {
+                    const select = document.querySelector(`.filter-select[data-column="${h}"]`);
+                    if (!select) return;
 
-                // Obtener los filtros activos excluyendo la columna actual
-                const otherFilters = { ...activeFilters };
-                delete otherFilters[h];
+                    const otherFilters = { ...activeFilters };
+                    delete otherFilters[h];
 
-                // Filtrar los datos según los otros filtros
-                let filteredData = allData.filter(row => {
-                    for (let col in otherFilters) {
-                        const filterVal = otherFilters[col];
+                    let filteredData = allData.filter(row => {
+                        for (let col in otherFilters) {
+                            const filterVal = otherFilters[col];
+                            if (!filterVal) continue;
+                            const raw = row[col];
+                            if (raw === null || raw === undefined) return false;
+                            const norm = normalizeGroup(String(raw));
+                            if (norm !== filterVal) return false;
+                        }
+                        return true;
+                    });
+
+                    const values = new Set();
+                    filteredData.forEach(row => {
+                        const val = row[h];
+                        if (val !== null && val !== undefined && val !== '') {
+                            const norm = normalizeGroup(String(val));
+                            if (norm) values.add(norm);
+                        }
+                    });
+
+                    const finalValues = (Object.keys(otherFilters).length === 0) ? allUniqueValues[h] : Array.from(
+                        values).sort();
+                    const currentVal = select.value;
+
+                    let html = `<option value="">Todos</option>`;
+                    finalValues.forEach(v => {
+                        html += `<option value="${v}">${v}</option>`;
+                    });
+                    select.innerHTML = html;
+
+                    if (currentVal && finalValues.includes(currentVal)) {
+                        select.value = currentVal;
+                    } else {
+                        if (activeFilters[h] && !finalValues.includes(activeFilters[h])) {
+                            delete activeFilters[h];
+                        }
+                        select.value = '';
+                    }
+                });
+            }
+
+            // ===== APLICAR FILTROS Y ORDEN =====
+            function applyFiltersAndRender() {
+                let filtered = allData.filter(row => {
+                    for (let col in activeFilters) {
+                        const filterVal = activeFilters[col];
                         if (!filterVal) continue;
                         const raw = row[col];
                         if (raw === null || raw === undefined) return false;
@@ -630,102 +808,51 @@
                     return true;
                 });
 
-                // Obtener los valores únicos de la columna h en los datos filtrados
-                const values = new Set();
-                filteredData.forEach(row => {
-                    const val = row[h];
-                    if (val !== null && val !== undefined && val !== '') {
-                        const norm = normalizeGroup(String(val));
-                        if (norm) values.add(norm);
-                    }
-                });
-
-                // Si no hay filtros activos, usar todos los valores
-                const finalValues = (Object.keys(otherFilters).length === 0) ? allUniqueValues[h] : Array.from(values).sort();
-
-                // Guardar el valor seleccionado actualmente
-                const currentVal = select.value;
-
-                // Reconstruir opciones
-                let html = `<option value="">Todos</option>`;
-                finalValues.forEach(v => {
-                    html += `<option value="${v}">${v}</option>`;
-                });
-                select.innerHTML = html;
-
-                // Restaurar la selección si aún es válida
-                if (currentVal && finalValues.includes(currentVal)) {
-                    select.value = currentVal;
-                } else {
-                    // Si el valor seleccionado ya no es válido, lo quitamos de activeFilters
-                    if (activeFilters[h] && !finalValues.includes(activeFilters[h])) {
-                        delete activeFilters[h];
-                    }
-                    select.value = '';
-                }
-            });
-        }
-
-        // ===== APLICAR FILTROS Y ORDEN =====
-        function applyFiltersAndRender() {
-            // 1. Filtrar
-            let filtered = allData.filter(row => {
-                for (let col in activeFilters) {
-                    const filterVal = activeFilters[col];
-                    if (!filterVal) continue;
-                    const raw = row[col];
-                    if (raw === null || raw === undefined) return false;
-                    const norm = normalizeGroup(String(raw));
-                    if (norm !== filterVal) return false;
-                }
-                return true;
-            });
-
-            // 2. Ordenar
-            if (sortState.column && sortState.direction) {
-                const col = sortState.column;
-                const dir = sortState.direction;
-                filtered = [...filtered].sort((a, b) => {
-                    let valA = a[col] ?? '';
-                    let valB = b[col] ?? '';
-                    if (typeof valA === 'number' && typeof valB === 'number') {
-                        return dir === 'asc' ? valA - valB : valB - valA;
-                    }
-                    valA = String(valA).toLowerCase();
-                    valB = String(valB).toLowerCase();
-                    if (valA < valB) return dir === 'asc' ? -1 : 1;
-                    if (valA > valB) return dir === 'asc' ? 1 : -1;
-                    return 0;
-                });
-            }
-
-            renderRows(filtered);
-            rowCount.textContent = filtered.length;
-        }
-
-        // ===== RENDERIZAR FILAS =====
-        function renderRows(data) {
-            const tbody = document.getElementById('tableBody');
-            if (!tbody) return;
-            let html = '';
-            if (data.length === 0) {
-                html = `<tr><td colspan="${visibleHeaders.length}" style="text-align:center; padding:30px; color:#9ca3af;">No hay datos que coincidan con los filtros</td></tr>`;
-            } else {
-                data.forEach(row => {
-                    html += '<tr>';
-                    visibleHeaders.forEach(h => {
-                        let val = row[h];
-                        if (val === null || val === undefined) val = '';
-                        let str = String(val);
-                        if (str.length > 50) str = str.substring(0, 47) + '…';
-                        html += `<td title="${String(val).replace(/"/g, '&quot;')}">${str}</td>`;
+                if (sortState.column && sortState.direction) {
+                    const col = sortState.column;
+                    const dir = sortState.direction;
+                    filtered = [...filtered].sort((a, b) => {
+                        let valA = a[col] ?? '';
+                        let valB = b[col] ?? '';
+                        if (typeof valA === 'number' && typeof valB === 'number') {
+                            return dir === 'asc' ? valA - valB : valB - valA;
+                        }
+                        valA = String(valA).toLowerCase();
+                        valB = String(valB).toLowerCase();
+                        if (valA < valB) return dir === 'asc' ? -1 : 1;
+                        if (valA > valB) return dir === 'asc' ? 1 : -1;
+                        return 0;
                     });
-                    html += '</tr>';
-                });
+                }
+
+                renderRows(filtered);
+                rowCount.textContent = filtered.length;
             }
-            tbody.innerHTML = html;
-        }
-    })();
-</script>
+
+            // ===== RENDERIZAR FILAS =====
+            function renderRows(data) {
+                const tbody = document.getElementById('tableBody');
+                if (!tbody) return;
+                let html = '';
+                if (data.length === 0) {
+                    html =
+                        `<tr><td colspan="${visibleHeaders.length}" style="text-align:center; padding:30px; color:#9ca3af;">No hay datos que coincidan con los filtros</td></tr>`;
+                } else {
+                    data.forEach(row => {
+                        html += '<tr>';
+                        visibleHeaders.forEach(h => {
+                            let val = row[h];
+                            if (val === null || val === undefined) val = '';
+                            let str = String(val);
+                            if (str.length > 50) str = str.substring(0, 47) + '…';
+                            html += `<td title="${String(val).replace(/"/g, '&quot;')}">${str}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                }
+                tbody.innerHTML = html;
+            }
+        })();
+    </script>
 </body>
 </html>
