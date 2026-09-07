@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock</title>
+    <title>Visualizador CSV - Filtros inteligentes</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         * {
@@ -11,10 +11,19 @@
             margin: 0;
             padding: 0;
         }
+        :root {
+            --primary: #4a6cf7;
+            --primary-light: #eef2ff;
+            --gray-bg: #f8fafc;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.06);
+            --radius: 12px;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
         html, body {
             height: 100%;
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4f7fc;
+            font-family: var(--font);
+            background: var(--gray-bg);
             overflow: hidden;
         }
         .container {
@@ -23,32 +32,45 @@
             height: 100vh;
             max-width: 100%;
             background: white;
-            padding: 10px 15px;
+            padding: 16px 24px;
+            box-shadow: var(--shadow);
         }
+        /* HEADER */
         .header {
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        .header h1 {
-            font-weight: 300;
-            font-size: 1.4rem;
-            color: #0b2b44;
+        .header-left h1 {
+            font-weight: 600;
+            font-size: 1.6rem;
+            color: #0b1e33;
             margin: 0;
+            letter-spacing: -0.5px;
         }
-        .header .subtitle {
-            color: #5e6f88;
-            font-size: 0.8rem;
+        .header-left h1 span {
+            color: var(--primary);
+        }
+        .header-left .subtitle {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .upload-area {
-            border: 2px dashed #b9c8dd;
-            border-radius: 8px;
-            padding: 6px 14px;
-            background: #fafcff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 6px 18px;
+            background: white;
             cursor: pointer;
             transition: 0.2s;
             display: inline-flex;
@@ -57,77 +79,134 @@
             flex-shrink: 0;
         }
         .upload-area:hover {
-            border-color: #3b7cff;
-            background: #f0f6ff;
+            border-color: var(--primary);
+            background: var(--primary-light);
         }
         .upload-area input {
             display: none;
         }
         .upload-label {
-            font-size: 0.85rem;
-            color: #2b4b6f;
+            font-size: 0.9rem;
+            color: #334155;
         }
         .upload-label strong {
-            color: #3b7cff;
-            text-decoration: underline;
+            color: var(--primary);
         }
         .file-name {
             font-weight: 500;
-            color: #1d3b5c;
+            color: #0b1e33;
+            font-size: 0.85rem;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .restore-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 4px 14px;
             font-size: 0.8rem;
+            cursor: pointer;
+            color: #475569;
+            transition: 0.15s;
+            display: none;
+        }
+        .restore-btn:hover {
+            background: #f1f5f9;
+            border-color: var(--primary);
+            color: var(--primary);
         }
         .filter-note {
-            background: #eef6ff;
-            border-left: 4px solid #3b7cff;
-            padding: 4px 12px;
-            border-radius: 5px;
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #1e293b;
+            flex-shrink: 0;
+            margin: 4px 0;
+            display: none;
+        }
+        .info-bar {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #475569;
+            padding: 4px 0;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 6px;
+        }
+        .info-bar .count {
+            background: #e2e8f0;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+            color: #0b1e33;
+        }
+        .warning {
+            background: #fef9e7;
+            border: 1px solid #facc15;
+            color: #854d0e;
+            padding: 4px 14px;
+            border-radius: 6px;
             font-size: 0.75rem;
-            color: #1d3b5c;
             flex-shrink: 0;
             margin: 3px 0;
             display: none;
         }
+
+        /* TABLA */
         .table-wrapper {
             flex: 1 1 auto;
             overflow: auto;
-            border-radius: 8px;
-            border: 1px solid #e3eaf2;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
             background: white;
             min-height: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
         }
         thead {
             position: sticky;
             top: 0;
             z-index: 3;
+            background: white;
         }
         th {
-            background: #e9eff7;
-            color: #1f3b57;
+            background: #f8fafc;
+            color: #1e293b;
             font-weight: 600;
-            padding: 4px 8px;
+            padding: 8px 12px;
             text-align: left;
-            white-space: nowrap;
-            border-bottom: 1px solid #d0dbe8;
+            border-bottom: 2px solid #e2e8f0;
             vertical-align: middle;
         }
-        th select {
-            width: 100%;
-            padding: 2px 4px;
-            font-size: 0.7rem;
-            border: 1px solid #d0dbe8;
-            border-radius: 4px;
-            background: white;
-            margin-top: 2px;
-            max-width: 120px;
+        th .header-flex {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        th select:focus {
-            border-color: #3b7cff;
-            outline: none;
+        th .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+        }
+        th .header-top span {
+            font-weight: 600;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .sort-group {
+            display: flex;
+            gap: 2px;
         }
         .sort-btn {
             background: none;
@@ -135,40 +214,72 @@
             cursor: pointer;
             font-size: 0.7rem;
             padding: 0 2px;
-            color: #889bb3;
-            vertical-align: middle;
+            color: #94a3b8;
+            transition: 0.1s;
+            line-height: 1;
+            border-radius: 4px;
         }
         .sort-btn:hover {
-            color: #3b7cff;
+            color: var(--primary);
+            background: #eef2ff;
         }
         .sort-btn.active-asc {
-            color: #3b7cff;
+            color: var(--primary);
             font-weight: bold;
         }
         .sort-btn.active-desc {
-            color: #e74c3c;
+            color: #ef4444;
             font-weight: bold;
         }
-        td {
-            padding: 4px 8px;
-            border-bottom: 1px solid #eef3f9;
+        th select {
+            width: 100%;
+            padding: 4px 6px;
+            font-size: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            color: #1e293b;
+            outline: none;
+            transition: 0.15s;
+            cursor: pointer;
+            min-width: 80px;
             max-width: 160px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
+        }
+        th select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15);
+        }
+        th select:hover {
+            border-color: #94a3b8;
+        }
+        td {
+            padding: 6px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: #1e293b;
         }
         tr:hover td {
-            background: #f8fbff;
+            background: #f8fafc;
         }
+
         .footer {
             flex-shrink: 0;
             text-align: center;
-            font-size: 0.65rem;
-            color: #889bb3;
-            padding-top: 4px;
-            border-top: 1px solid #e9edf4;
-            margin-top: 4px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            padding-top: 6px;
+            border-top: 1px solid #f1f5f9;
+            margin-top: 6px;
         }
+
         #tableContainer {
             display: none;
             flex: 1 1 auto;
@@ -178,74 +289,56 @@
         #filterNote {
             display: none;
         }
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 3px 10px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            flex-shrink: 0;
-            margin: 2px 0;
-            display: none;
-        }
-        .restore-btn {
-            background: none;
-            border: 1px solid #d0dbe8;
-            border-radius: 4px;
-            padding: 2px 10px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            color: #3b7cff;
-            flex-shrink: 0;
-            margin-left: 6px;
-        }
-        .restore-btn:hover {
-            background: #e9eff7;
-        }
-        @media (max-width: 600px) {
-            .container { padding: 5px 8px; }
-            .header h1 { font-size: 1.1rem; }
-            td { font-size: 0.65rem; padding: 3px 5px; }
-            th { font-size: 0.7rem; padding: 3px 5px; }
-            th select { font-size: 0.6rem; max-width: 80px; }
+
+        @media (max-width: 640px) {
+            .container { padding: 10px 12px; }
+            .header-left h1 { font-size: 1.2rem; }
+            td { font-size: 0.7rem; padding: 4px 6px; }
+            th { padding: 4px 6px; }
+            th select { font-size: 0.65rem; max-width: 100px; min-width: 60px; padding: 2px 4px; }
+            .sort-btn { font-size: 0.6rem; }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- HEADER -->
     <div class="header">
-        <div>
-            <h1>📊 Visualizador CSV</h1>
-            <span class="subtitle">Filtros desplegables con agrupación inteligente</span>
+        <div class="header-left">
+            <h1>📊 <span>Visor</span> CSV</h1>
+            <div class="subtitle">Filtros desplegables con agrupación inteligente</div>
         </div>
-        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+        <div class="header-actions">
             <div class="upload-area" id="uploadArea">
                 <div class="upload-label">📂 <strong>Selecciona</strong> o arrastra CSV</div>
                 <input type="file" id="fileInput" accept=".csv">
                 <span class="file-name" id="fileName"></span>
             </div>
-            <button class="restore-btn" id="restoreFilters" style="display:none;">✕ Limpiar filtros</button>
+            <button class="restore-btn" id="restoreFilters">✕ Limpiar filtros</button>
         </div>
     </div>
 
     <div id="filterNote" class="filter-note">
         ⚡ Columnas: <strong id="shownColumnsList"></strong>
     </div>
-    <div id="warningMessage" class="warning">⚠️ Más de 5000 filas – puede ser lento.</div>
+    <div id="warningMessage" class="warning">⚠️ Más de 5000 filas – el rendimiento puede ser lento.</div>
 
     <div id="tableContainer">
+        <div class="info-bar">
+            <span>Mostrando <span id="rowCount" class="count">0</span> filas</span>
+            <span id="filterHint" style="color:#94a3b8; font-size:0.75rem;">Usa los desplegables para filtrar</span>
+        </div>
         <div class="table-wrapper" id="tableWrapper">
-            <!-- Tabla se genera con JS -->
+            <!-- Tabla generada con JS -->
         </div>
     </div>
 
-    <div class="footer">Hecho por Juano</div>
+    <div class="footer">Hecho con ❤️ – agrupa automáticamente Ford, VW, etc.</div>
 </div>
 
 <script>
     (function() {
-        // ========== COLUMNAS Y NOMBRES ==========
+        // ========== CONFIGURACIÓN ==========
         const TARGET_COLUMNS = [
             'stock_brand', 'stock_model_version', 'stock_version', 'stock_domain',
             'stock_used_year', 'stock_color', 'stock_vehicle_kms', 'stock_location'
@@ -267,12 +360,19 @@
             if (!text) return '';
             let s = String(text).trim().toLowerCase();
 
-            // 1. Eliminar contenido entre paréntesis y la palabra "usado"
-            s = s.replace(/\([^)]*\)/g, '').replace(/\busado\b/g, '').replace(/\bhyundai\b/g, '');
-            // 2. Eliminar espacios extra
+            // 1. Eliminar todo lo que no sea letras, números y espacios (para limpiar)
+            s = s.replace(/[^a-z0-9\s]/g, ' ');
+
+            // 2. Eliminar palabras comunes que no aportan (usado, hyundai, etc.)
+            const removeWords = ['usado', 'hyundai', '0km', 'modelo', 'version', 'full', 'base'];
+            removeWords.forEach(word => {
+                s = s.replace(new RegExp('\\b' + word + '\\b', 'g'), '');
+            });
+
+            // 3. Eliminar espacios extra
             s = s.replace(/\s+/g, ' ').trim();
 
-            // 3. Mapeo de sinónimos (agrupar)
+            // 4. Mapeo de sinónimos (agrupar)
             const synonyms = {
                 'vw': 'volkswagen',
                 'volkswagen': 'volkswagen',
@@ -290,35 +390,36 @@
                 'triumph': 'triumph',
                 'dodge': 'dodge',
                 'cherry': 'cherry',
-                'kangoo': 'renault'  // Kangoo es modelo de Renault, pero lo dejamos como renault si quieres
+                'kangoo': 'renault'   // Kangoo es modelo de Renault
             };
 
-            // Si el texto coincide con alguna clave, devolvemos el valor mapeado
+            // Si el texto coincide exactamente con alguna clave, devolver el valor
             if (synonyms[s]) return synonyms[s];
 
-            // Si el texto contiene alguna palabra clave, lo agrupamos (ej: "ford usado" → "ford")
+            // Si alguna clave está contenida en el texto, devolver su valor
             for (let key in synonyms) {
                 if (s.includes(key)) {
                     return synonyms[key];
                 }
             }
 
+            // Si no, devolver el texto limpio
             return s;
         }
 
-        // ========== LIMPIEZA BÁSICA (para mostrar) ==========
+        // ========== LIMPIEZA BÁSICA PARA MOSTRAR ==========
         function cleanText(str) {
             if (!str) return '';
-            let s = String(str).trim().toLowerCase();
-            // Correcciones menores (ortográficas)
+            let s = String(str).trim();
+            // Correcciones ortográficas comunes
             const corrections = {
                 'biarco': 'blanco', 'blanca': 'blanco',
                 'gris plata': 'gris plata', 'plateado': 'gris plata',
                 'moreno': 'negro',
                 'amarón': 'marrón', 'marron': 'marrón'
             };
-            if (corrections[s]) return corrections[s];
-            return s.replace(/\s+/g, ' ').trim();
+            if (corrections[s.toLowerCase()]) return corrections[s.toLowerCase()];
+            return s;
         }
 
         // ========== DOM ==========
@@ -331,33 +432,33 @@
         const shownColumnsList = document.getElementById('shownColumnsList');
         const warningMessage = document.getElementById('warningMessage');
         const restoreFiltersBtn = document.getElementById('restoreFilters');
+        const rowCount = document.getElementById('rowCount');
+        const filterHint = document.getElementById('filterHint');
 
         let allData = [];
         let currentHeaders = [];
         let visibleHeaders = [];
         let sortConfig = { column: null, direction: 'asc' };
-        // Filtros activos: { columna: valorSeleccionado }
         let activeFilters = {};
-
-        // Almacenar valores únicos normalizados por columna
         let uniqueValues = {};
 
+        // Eventos
         uploadArea.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', handleFile);
 
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = '#3b7cff';
-            uploadArea.style.background = '#eaf2ff';
+            uploadArea.style.borderColor = '#4a6cf7';
+            uploadArea.style.background = '#eef2ff';
         });
         uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = '#b9c8dd';
-            uploadArea.style.background = '#fafcff';
+            uploadArea.style.borderColor = '#cbd5e1';
+            uploadArea.style.background = 'white';
         });
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = '#b9c8dd';
-            uploadArea.style.background = '#fafcff';
+            uploadArea.style.borderColor = '#cbd5e1';
+            uploadArea.style.background = 'white';
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
                 handleFile();
@@ -365,11 +466,11 @@
         });
 
         restoreFiltersBtn.addEventListener('click', function() {
-            // Resetear todos los selects a "Todos"
             document.querySelectorAll('.filter-select').forEach(sel => sel.value = '');
             activeFilters = {};
-            applyFiltersAndRender();
             this.style.display = 'none';
+            filterHint.textContent = 'Usa los desplegables para filtrar';
+            applyFiltersAndRender();
         });
 
         function handleFile() {
@@ -412,13 +513,12 @@
                     shownColumnsList.textContent = displayList;
                     filterNote.style.display = 'block';
 
-                    // Procesar datos: limpiar y normalizar para agrupación
+                    // Limpiar y guardar datos
                     allData = results.data.map(row => {
                         const newRow = {};
                         filteredHeaders.forEach(h => {
                             let val = row[h];
                             if (typeof val === 'string') {
-                                // Guardamos el valor limpio para mostrar
                                 val = cleanText(val);
                             }
                             newRow[h] = val;
@@ -454,18 +554,20 @@
             });
         }
 
-        // ========== CONSTRUIR TABLA CON FILTROS ==========
+        // ========== CONSTRUIR TABLA ==========
         function buildTable(data, visibleCols) {
             let tableHtml = '<table><thead><tr>';
             visibleCols.forEach(h => {
                 const displayName = DISPLAY_NAMES[h] || h;
                 tableHtml += `
                     <th>
-                        <div style="display:flex; flex-direction:column; gap:2px;">
-                            <div>
-                                ${displayName}
-                                <button class="sort-btn" data-column="${h}" data-direction="asc">▲</button>
-                                <button class="sort-btn" data-column="${h}" data-direction="desc">▼</button>
+                        <div class="header-flex">
+                            <div class="header-top">
+                                <span>${displayName}</span>
+                                <div class="sort-group">
+                                    <button class="sort-btn" data-column="${h}" data-direction="asc">▲</button>
+                                    <button class="sort-btn" data-column="${h}" data-direction="desc">▼</button>
+                                </div>
                             </div>
                             <select class="filter-select" data-column="${h}">
                                 <option value="">Todos</option>
@@ -499,14 +601,14 @@
                     } else {
                         activeFilters[col] = val;
                     }
-                    // Mostrar/ocultar botón limpiar
                     const hasFilter = Object.keys(activeFilters).length > 0;
                     restoreFiltersBtn.style.display = hasFilter ? 'inline-block' : 'none';
+                    filterHint.textContent = hasFilter ? 'Filtros activos' : 'Usa los desplegables para filtrar';
                     applyFiltersAndRender();
                 });
             });
 
-            // Cargar filtros activos si existen (al restaurar)
+            // Cargar filtros activos si existen
             document.querySelectorAll('.filter-select').forEach(sel => {
                 const col = sel.dataset.column;
                 if (activeFilters[col]) {
@@ -514,27 +616,24 @@
                 }
             });
 
-            // Aplicar filtros y renderizar
             applyFiltersAndRender();
         }
 
         // ========== APLICAR FILTROS Y RENDERIZAR ==========
         function applyFiltersAndRender() {
-            // 1. Filtrar datos según activeFilters
             let filtered = allData.filter(row => {
                 for (let col in activeFilters) {
                     const filterVal = activeFilters[col];
                     if (!filterVal) continue;
                     const raw = row[col];
                     if (raw === null || raw === undefined) return false;
-                    // Normalizar el valor de la fila para comparar con el filtro
                     const norm = normalizeGroup(String(raw));
                     if (norm !== filterVal) return false;
                 }
                 return true;
             });
 
-            // 2. Aplicar orden si existe
+            // Ordenar si existe
             if (sortConfig.column) {
                 const col = sortConfig.column;
                 const dir = sortConfig.direction;
@@ -553,13 +652,13 @@
             }
 
             renderRows(filtered);
+            rowCount.textContent = filtered.length;
         }
 
         // ========== MANEJAR ORDEN ==========
         function handleSort(column, direction) {
             sortConfig.column = column;
             sortConfig.direction = direction;
-            // Marcar botones activos
             document.querySelectorAll('.sort-btn').forEach(b => {
                 b.classList.remove('active-asc', 'active-desc');
                 if (b.dataset.column === column) {
@@ -577,7 +676,7 @@
 
             let html = '';
             if (data.length === 0) {
-                html = `<tr><td colspan="${visibleHeaders.length}" style="text-align:center; padding:15px; color:#889bb3;">No hay datos que coincidan con los filtros</td></tr>`;
+                html = `<tr><td colspan="${visibleHeaders.length}" style="text-align:center; padding:20px; color:#94a3b8;">No hay datos que coincidan con los filtros</td></tr>`;
             } else {
                 data.forEach(row => {
                     html += '<tr>';
@@ -593,9 +692,6 @@
             }
             tbody.innerHTML = html;
         }
-
-        // Exponer applyFiltersAndRender por si se necesita
-        window.applyFiltersAndRender = applyFiltersAndRender;
     })();
 </script>
 </body>
