@@ -3,186 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador CSV - Orden con un botón</title>
+    <title>Visualizador CSV - Búsqueda y Orden</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        html, body {
-            height: 100%;
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4f7fc;
-            overflow: hidden;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 100%;
-            background: white;
-            padding: 15px 20px;
-        }
-        .header {
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-        .header h1 {
-            font-weight: 300;
-            font-size: 1.5rem;
-            color: #0b2b44;
-            margin: 0;
-        }
-        .header .subtitle {
-            color: #5e6f88;
-            font-size: 0.85rem;
-        }
-        .upload-area {
-            border: 2px dashed #b9c8dd;
-            border-radius: 10px;
-            padding: 8px 18px;
-            background: #fafcff;
-            cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-        .upload-area:hover {
-            border-color: #3b7cff;
-            background: #f0f6ff;
-        }
-        .upload-area input {
-            display: none;
-        }
-        .upload-label {
-            font-size: 0.9rem;
-            color: #2b4b6f;
-        }
-        .upload-label strong {
-            color: #3b7cff;
-            text-decoration: underline;
-        }
-        .file-name {
-            font-weight: 500;
-            color: #1d3b5c;
-            font-size: 0.85rem;
-        }
-        .filter-note {
-            background: #eef6ff;
-            border-left: 4px solid #3b7cff;
-            padding: 5px 14px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: #1d3b5c;
-            flex-shrink: 0;
-            margin: 4px 0;
-            display: none;
-        }
-        .table-wrapper {
-            flex: 1 1 auto;
-            overflow: auto;
-            border-radius: 10px;
-            border: 1px solid #e3eaf2;
-            background: white;
-            min-height: 0;
-            position: relative;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.82rem;
-        }
-        thead {
-            position: sticky;
-            top: 0;
-            z-index: 3;
-        }
-        th {
-            background: #e9eff7;
-            color: #1f3b57;
-            font-weight: 600;
-            padding: 6px 10px;
-            text-align: left;
-            white-space: nowrap;
-            border-bottom: 1px solid #d0dbe8;
-        }
-        .sort-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 0.8rem;
-            padding: 0 4px;
-            margin-left: 6px;
-            color: #889bb3;
-            transition: 0.15s;
-            vertical-align: middle;
-        }
-        .sort-btn:hover {
-            color: #3b7cff;
-        }
-        .sort-btn.active-asc {
-            color: #3b7cff;
-            font-weight: bold;
-        }
-        .sort-btn.active-desc {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        td {
-            padding: 6px 10px;
-            border-bottom: 1px solid #eef3f9;
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        tr:hover td {
-            background: #f8fbff;
-        }
-        .footer {
-            flex-shrink: 0;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #889bb3;
-            padding-top: 6px;
-            border-top: 1px solid #e9edf4;
-            margin-top: 6px;
-        }
-        #tableContainer {
-            display: none;
-            flex: 1 1 auto;
-            min-height: 0;
-            flex-direction: column;
-        }
-        #filterNote {
-            display: none;
-        }
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            flex-shrink: 0;
-            margin: 3px 0;
-            display: none;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; font-family: 'Segoe UI', sans-serif; background: #f4f7fc; overflow: hidden; }
+        .container { display: flex; flex-direction: column; height: 100vh; max-width: 100%; background: white; padding: 15px 20px; }
+        .header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+        .header h1 { font-weight: 300; font-size: 1.5rem; color: #0b2b44; margin: 0; }
+        .header .subtitle { color: #5e6f88; font-size: 0.85rem; }
+        .upload-area { border: 2px dashed #b9c8dd; border-radius: 10px; padding: 8px 18px; background: #fafcff; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .upload-area:hover { border-color: #3b7cff; background: #f0f6ff; }
+        .upload-area input { display: none; }
+        .upload-label { font-size: 0.9rem; color: #2b4b6f; }
+        .upload-label strong { color: #3b7cff; text-decoration: underline; }
+        .file-name { font-weight: 500; color: #1d3b5c; font-size: 0.85rem; }
+        .filter-note { background: #eef6ff; border-left: 4px solid #3b7cff; padding: 5px 14px; border-radius: 6px; font-size: 0.8rem; color: #1d3b5c; flex-shrink: 0; margin: 4px 0; display: none; }
+        .table-wrapper { flex: 1 1 auto; overflow: auto; border-radius: 10px; border: 1px solid #e3eaf2; background: white; min-height: 0; position: relative; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        thead { position: sticky; top: 0; z-index: 3; }
+        th { background: #e9eff7; color: #1f3b57; font-weight: 600; padding: 6px 10px; text-align: left; white-space: nowrap; border-bottom: 1px solid #d0dbe8; }
+        .sort-btn { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 0 4px; margin-left: 6px; color: #889bb3; transition: 0.15s; vertical-align: middle; }
+        .sort-btn:hover { color: #3b7cff; }
+        .sort-btn.active-asc { color: #3b7cff; font-weight: bold; }
+        .sort-btn.active-desc { color: #e74c3c; font-weight: bold; }
+        td { padding: 6px 10px; border-bottom: 1px solid #eef3f9; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        tr:hover td { background: #f8fbff; }
+        .footer { flex-shrink: 0; text-align: center; font-size: 0.7rem; color: #889bb3; padding-top: 6px; border-top: 1px solid #e9edf4; margin-top: 6px; }
+        #tableContainer { display: none; flex: 1 1 auto; min-height: 0; flex-direction: column; }
+        #filterNote { display: none; }
+        .warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; flex-shrink: 0; margin: 3px 0; display: none; }
+        .search-box { flex-shrink: 0; margin: 6px 0; display: flex; gap: 8px; align-items: center; }
+        .search-box input { flex: 1; padding: 6px 12px; border: 1px solid #d0dbe8; border-radius: 6px; font-size: 0.85rem; max-width: 300px; }
+        .search-box input:focus { outline: none; border-color: #3b7cff; box-shadow: 0 0 0 2px rgba(59,124,255,0.15); }
+        .clear-search { background: none; border: none; color: #3b7cff; cursor: pointer; font-size: 0.8rem; padding: 0 8px; }
+        .clear-search:hover { text-decoration: underline; }
+        .counter { font-size: 0.8rem; color: #5e6f88; margin-left: 8px; }
         @media (max-width: 600px) {
             .container { padding: 8px 10px; }
             .header h1 { font-size: 1.1rem; }
             td { font-size: 0.7rem; padding: 4px 6px; }
             th { font-size: 0.75rem; padding: 4px 6px; }
-            .sort-btn { font-size: 0.7rem; }
+            .search-box input { max-width: 150px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -191,14 +53,12 @@
     <div class="header">
         <div>
             <h1>📊 Visualizador CSV</h1>
-            <span class="subtitle">Ordená con un clic (ascendente / descendente)</span>
+            <span class="subtitle">Buscar en todas las columnas y ordenar con un clic</span>
         </div>
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-label">📂 <strong>Selecciona</strong> o arrastra CSV</div>
-                <input type="file" id="fileInput" accept=".csv">
-                <span class="file-name" id="fileName"></span>
-            </div>
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-label">📂 <strong>Selecciona</strong> o arrastra CSV</div>
+            <input type="file" id="fileInput" accept=".csv">
+            <span class="file-name" id="fileName"></span>
         </div>
     </div>
 
@@ -207,23 +67,29 @@
     </div>
     <div id="warningMessage" class="warning">⚠️ Más de 5000 filas – el rendimiento puede verse afectado.</div>
 
+    <!-- Búsqueda global -->
+    <div class="search-box" id="searchBox" style="display:none;">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar en todas las columnas...">
+        <span class="counter" id="rowCounter"></span>
+        <button class="clear-search" id="clearSearch">✕</button>
+    </div>
+
     <div id="tableContainer">
         <div class="table-wrapper" id="tableWrapper">
             <!-- Tabla generada con JS -->
         </div>
     </div>
 
-    <div class="footer">Hecho por Juano</div>
+    <div class="footer">Hecho con ❤️ – búsqueda global y orden por columna</div>
 </div>
 
 <script>
     (function() {
-        // ---------- COLUMNAS Y NOMBRES MOSTRADOS ----------
+        // Columnas y nombres
         const TARGET_COLUMNS = [
             'stock_brand', 'stock_model_version', 'stock_version', 'stock_domain',
             'stock_used_year', 'stock_color', 'stock_vehicle_kms', 'stock_location'
         ];
-
         const DISPLAY_NAMES = {
             'stock_brand': 'Marca',
             'stock_model_version': 'Modelo',
@@ -235,7 +101,7 @@
             'stock_location': 'Ubicación'
         };
 
-        // ---------- LIMPIEZA ----------
+        // Limpieza
         function cleanText(str) {
             if (!str) return '';
             let s = String(str).trim().toLowerCase();
@@ -255,7 +121,7 @@
             return s.replace(/\s+/g, ' ').trim();
         }
 
-        // ---------- DOM ----------
+        // DOM
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
         const fileName = document.getElementById('fileName');
@@ -264,10 +130,15 @@
         const filterNote = document.getElementById('filterNote');
         const shownColumnsList = document.getElementById('shownColumnsList');
         const warningMessage = document.getElementById('warningMessage');
+        const searchInput = document.getElementById('searchInput');
+        const searchBox = document.getElementById('searchBox');
+        const rowCounter = document.getElementById('rowCounter');
+        const clearSearch = document.getElementById('clearSearch');
 
         let allData = [];
         let currentHeaders = [];
-        let sortConfig = { column: null, direction: 'asc' }; // 'asc' o 'desc'
+        let sortConfig = { column: null, direction: 'asc' };
+        let searchTerm = '';
 
         uploadArea.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', handleFile);
@@ -289,6 +160,18 @@
                 fileInput.files = e.dataTransfer.files;
                 handleFile();
             }
+        });
+
+        // Eventos de búsqueda
+        searchInput.addEventListener('input', function() {
+            searchTerm = this.value.trim().toLowerCase();
+            applyFiltersAndSort();
+        });
+
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            searchTerm = '';
+            applyFiltersAndSort();
         });
 
         function handleFile() {
@@ -331,7 +214,6 @@
                     shownColumnsList.textContent = displayList;
                     filterNote.style.display = 'block';
 
-                    // Limpiar datos
                     allData = results.data.map(row => {
                         const newRow = {};
                         filteredHeaders.forEach(h => {
@@ -345,6 +227,9 @@
                     });
                     currentHeaders = filteredHeaders;
                     sortConfig = { column: null, direction: 'asc' };
+                    searchTerm = '';
+                    searchInput.value = '';
+                    searchBox.style.display = 'flex';
 
                     buildTable(allData, currentHeaders);
                     tableContainer.style.display = 'flex';
@@ -355,13 +240,12 @@
             });
         }
 
-        // ---------- CONSTRUIR TABLA CON BOTÓN ÚNICO ----------
         function buildTable(data, headers) {
             let tableHtml = '<table><thead><tr>';
             headers.forEach(h => {
                 const displayName = DISPLAY_NAMES[h] || h;
                 tableHtml += `<th>${displayName} 
-                    <button class="sort-btn" data-column="${h}" title="Ordenar">↕</button>
+                    <button class="sort-btn" data-column="${h}">↕</button>
                 </th>`;
             });
             tableHtml += '</tr></thead><tbody id="tableBody">';
@@ -369,74 +253,93 @@
 
             tableWrapper.innerHTML = tableHtml;
 
-            // Asignar evento a cada botón
-            const buttons = document.querySelectorAll('.sort-btn');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    const column = this.dataset.column;
-                    handleSort(column);
+            // Eventos de orden
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const col = this.dataset.column;
+                    toggleSort(col);
                 });
             });
 
-            // Renderizar datos sin orden
-            renderRows(data);
+            applyFiltersAndSort();
         }
 
-        // ---------- MANEJAR ORDEN (alterna asc/desc) ----------
-        function handleSort(column) {
-            // Determinar nueva dirección
-            let newDirection = 'asc';
+        function toggleSort(column) {
             if (sortConfig.column === column) {
-                // Si ya está ordenado por esta columna, invertir
-                newDirection = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.column = column;
+                sortConfig.direction = 'asc';
             }
-            // Si es una columna nueva, empezar con asc
-            sortConfig.column = column;
-            sortConfig.direction = newDirection;
+            applyFiltersAndSort();
+        }
 
-            // Ordenar datos
-            const sorted = [...allData].sort((a, b) => {
-                let valA = a[column] ?? '';
-                let valB = b[column] ?? '';
+        function applyFiltersAndSort() {
+            // Filtrar
+            let filtered = allData;
+            if (searchTerm) {
+                filtered = allData.filter(row => {
+                    for (let h of currentHeaders) {
+                        let val = row[h];
+                        if (val !== null && val !== undefined) {
+                            if (String(val).toLowerCase().includes(searchTerm)) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                });
+            }
 
-                if (typeof valA === 'number' && typeof valB === 'number') {
-                    return newDirection === 'asc' ? valA - valB : valB - valA;
-                }
-                valA = String(valA).toLowerCase();
-                valB = String(valB).toLowerCase();
-                if (valA < valB) return newDirection === 'asc' ? -1 : 1;
-                if (valA > valB) return newDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
+            // Ordenar
+            if (sortConfig.column) {
+                const col = sortConfig.column;
+                const dir = sortConfig.direction;
+                filtered = [...filtered].sort((a, b) => {
+                    let valA = a[col] ?? '';
+                    let valB = b[col] ?? '';
+                    if (typeof valA === 'number' && typeof valB === 'number') {
+                        return dir === 'asc' ? valA - valB : valB - valA;
+                    }
+                    valA = String(valA).toLowerCase();
+                    valB = String(valB).toLowerCase();
+                    if (valA < valB) return dir === 'asc' ? -1 : 1;
+                    if (valA > valB) return dir === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
 
-            renderRows(sorted);
+            // Actualizar contador
+            rowCounter.textContent = `${filtered.length} filas${allData.length !== filtered.length ? ` (de ${allData.length})` : ''}`;
 
-            // Actualizar clases de los botones
-            document.querySelectorAll('.sort-btn').forEach(b => {
-                b.classList.remove('active-asc', 'active-desc');
-                const col = b.dataset.column;
-                if (col === column) {
-                    if (newDirection === 'asc') {
-                        b.classList.add('active-asc');
-                        b.textContent = '▲';
+            // Renderizar
+            renderRows(filtered);
+
+            // Actualizar botones de orden
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active-asc', 'active-desc');
+                const col = btn.dataset.column;
+                if (col === sortConfig.column) {
+                    if (sortConfig.direction === 'asc') {
+                        btn.classList.add('active-asc');
+                        btn.textContent = '▲';
                     } else {
-                        b.classList.add('active-desc');
-                        b.textContent = '▼';
+                        btn.classList.add('active-desc');
+                        btn.textContent = '▼';
                     }
                 } else {
-                    b.textContent = '↕';
+                    btn.textContent = '↕';
                 }
             });
         }
 
-        // ---------- RENDERIZAR FILAS ----------
         function renderRows(data) {
             const tbody = document.getElementById('tableBody');
             if (!tbody) return;
 
             let html = '';
             if (data.length === 0) {
-                html = `<tr><td colspan="${currentHeaders.length}" style="text-align:center; padding:20px; color:#889bb3;">No hay datos</td></tr>`;
+                html = `<tr><td colspan="${currentHeaders.length}" style="text-align:center; padding:20px; color:#889bb3;">No se encontraron resultados</td></tr>`;
             } else {
                 data.forEach(row => {
                     html += '<tr>';
