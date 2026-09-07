@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor CSV Pro</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visor CSV Pro - Filtros encadenados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         /* ===== RESET Y VARIABLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary: #7c3aed;
             --primary-light: #ede9fe;
-            --primary-dark: #6d28d9;
             --bg: #f5f3ff;
             --card: #ffffff;
             --border: #e5e7eb;
@@ -24,16 +22,12 @@
             --shadow: 0 10px 40px rgba(124, 58, 237, 0.08);
             --radius: 16px;
         }
-
-        html,
-        body {
+        html, body {
             height: 100%;
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
             overflow: hidden;
         }
-
-        /* ===== APP ===== */
         .app {
             display: flex;
             flex-direction: column;
@@ -42,8 +36,6 @@
             padding: 24px 32px;
             background: var(--bg);
         }
-
-        /* ===== HEADER ===== */
         .header {
             display: flex;
             align-items: center;
@@ -62,9 +54,7 @@
             color: var(--text);
             margin: 0;
         }
-        .header-left h1 span {
-            color: var(--primary);
-        }
+        .header-left h1 span { color: var(--primary); }
         .header-left .sub {
             font-size: 0.85rem;
             color: var(--text-light);
@@ -74,8 +64,6 @@
             align-items: center;
             gap: 12px;
         }
-
-        /* ===== UPLOAD ===== */
         .upload {
             border: 2px dashed var(--border);
             border-radius: 12px;
@@ -91,16 +79,12 @@
             border-color: var(--primary);
             background: var(--primary-light);
         }
-        .upload input {
-            display: none;
-        }
+        .upload input { display: none; }
         .upload-label {
             font-weight: 500;
             color: var(--text);
         }
-        .upload-label strong {
-            color: var(--primary);
-        }
+        .upload-label strong { color: var(--primary); }
         .file-name {
             color: var(--text-light);
             font-size: 0.85rem;
@@ -109,8 +93,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        /* ===== BOTONES ===== */
         .btn-clear {
             background: white;
             border: 1px solid var(--border);
@@ -128,8 +110,6 @@
             border-color: #ef4444;
             color: #dc2626;
         }
-
-        /* ===== NOTAS ===== */
         .note {
             background: var(--primary-light);
             padding: 8px 18px;
@@ -150,8 +130,6 @@
             margin-bottom: 6px;
             display: none;
         }
-
-        /* ===== INFO BAR ===== */
         .info-bar {
             display: flex;
             justify-content: space-between;
@@ -175,8 +153,6 @@
             color: var(--text-light);
             font-size: 0.8rem;
         }
-
-        /* ===== TABLA ===== */
         .table-wrap {
             flex: 1 1 auto;
             overflow: auto;
@@ -199,19 +175,25 @@
         }
         th {
             background: #fafafa;
-            padding: 10px 16px;
-            text-align: left;
+            padding: 10px 12px;
+            text-align: center;
             border-bottom: 2px solid var(--border);
+            vertical-align: middle;
         }
         th .col-header {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
         }
         th .col-top {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            flex-wrap: wrap;
         }
         th .col-top span {
             font-weight: 700;
@@ -219,38 +201,25 @@
             color: var(--text);
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            white-space: nowrap;
         }
-        .sort-group {
-            display: flex;
-            gap: 4px;
-        }
-        .sort-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
+        .sort-select {
             font-size: 0.7rem;
             padding: 2px 6px;
+            border: 1px solid var(--border);
             border-radius: 6px;
-            color: var(--text-light);
+            background: white;
+            color: var(--text);
+            cursor: pointer;
+            outline: none;
             transition: 0.15s;
+            min-width: 80px;
         }
-        .sort-btn:hover {
-            background: var(--primary-light);
-            color: var(--primary);
+        .sort-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
         }
-        .sort-btn.active-asc {
-            color: var(--primary);
-            background: var(--primary-light);
-            font-weight: 700;
-        }
-        .sort-btn.active-desc {
-            color: #dc2626;
-            background: #fee2e2;
-            font-weight: 700;
-        }
-
-        /* ===== SELECT ===== */
-        th select {
+        .filter-select {
             width: 100%;
             padding: 6px 10px;
             font-size: 0.8rem;
@@ -269,28 +238,24 @@
             min-width: 80px;
             max-width: 180px;
         }
-        th select:focus {
+        .filter-select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
         }
-        th select:hover {
+        .filter-select:hover {
             border-color: var(--primary);
         }
-
         td {
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-bottom: 1px solid #f3f4f6;
             max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             color: var(--text);
+            text-align: left;
         }
-        tr:hover td {
-            background: #fafafa;
-        }
-
-        /* ===== FOOTER ===== */
+        tr:hover td { background: #fafafa; }
         .footer {
             flex-shrink: 0;
             text-align: center;
@@ -300,93 +265,66 @@
             margin-top: 10px;
             border-top: 1px solid var(--border);
         }
-
-        /* ===== OCULTOS ===== */
         #tableContainer {
             display: none;
             flex: 1 1 auto;
             min-height: 0;
             flex-direction: column;
         }
-        #filterNote {
-            display: none;
-        }
+        #filterNote { display: none; }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
-            .app {
-                padding: 12px;
-            }
-            .header {
-                padding: 12px 16px;
-            }
-            .header-left h1 {
-                font-size: 1.2rem;
-            }
-            th {
-                padding: 6px 8px;
-            }
-            td {
-                padding: 4px 8px;
-                font-size: 0.7rem;
-            }
-            th select {
-                font-size: 0.65rem;
-                min-width: 60px;
-                max-width: 100px;
-                padding: 3px 6px;
-            }
-            .upload {
-                padding: 4px 12px;
-            }
-            .upload-label {
-                font-size: 0.75rem;
-            }
+            .app { padding: 12px; }
+            .header { padding: 12px 16px; }
+            .header-left h1 { font-size: 1.2rem; }
+            th { padding: 6px 6px; }
+            td { padding: 4px 6px; font-size: 0.7rem; }
+            .filter-select { font-size: 0.65rem; min-width: 60px; max-width: 100px; padding: 3px 6px; }
+            .sort-select { font-size: 0.6rem; min-width: 60px; padding: 2px 4px; }
+            .upload { padding: 4px 12px; }
+            .upload-label { font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="app">
-    <!-- HEADER -->
     <div class="header">
         <div class="header-left">
             <h1>📊 <span>Visor</span> CSV</h1>
-            <div class="sub">Filtros inteligentes con agrupación automática</div>
+            <div class="sub">Filtros encadenados – elige marca y solo verás sus modelos</div>
         </div>
         <div class="header-actions">
             <div class="upload" id="uploadArea">
                 <div class="upload-label">📂 <strong>Selecciona</strong> CSV</div>
-                <input type="file" id="fileInput" accept=".csv">
+                <input type="file" id="fileInput" accept=".csv" />
                 <span class="file-name" id="fileName"></span>
             </div>
             <button class="btn-clear" id="restoreFilters">✕ Limpiar filtros</button>
         </div>
     </div>
 
-    <!-- NOTAS -->
     <div id="filterNote" class="note">
         ⚡ Columnas: <strong id="shownColumnsList"></strong>
     </div>
     <div id="warningMessage" class="warning">⚠️ Más de 5000 filas – puede ser lento.</div>
 
-    <!-- TABLA -->
     <div id="tableContainer">
         <div class="info-bar">
             <span>📌 <span id="rowCount" class="badge">0</span> filas</span>
             <span class="hint" id="filterHint">🔄 Usa los desplegables para filtrar</span>
         </div>
         <div class="table-wrap" id="tableWrapper">
-            <!-- JS genera -->
+            <!-- Generado por JS -->
         </div>
     </div>
 
-    <div class="footer">Hecho con ❤️ – agrupa Ford, VW, etc. automáticamente</div>
+    <div class="footer">Hecho con ❤️ – filtros que se actualizan solos</div>
 </div>
 
 <script>
     (function() {
-        // ===== CONFIG =====
+        // ===== CONFIGURACIÓN =====
         const TARGET_COLUMNS = [
             'stock_brand', 'stock_model_version', 'stock_version', 'stock_domain',
             'stock_used_year', 'stock_color', 'stock_vehicle_kms', 'stock_location'
@@ -402,7 +340,7 @@
             'stock_location': 'Ubicación'
         };
 
-        // ===== NORMALIZACIÓN =====
+        // ===== NORMALIZACIÓN PARA AGRUPAR =====
         function normalizeGroup(text) {
             if (!text) return '';
             let s = String(text).trim().toLowerCase();
@@ -469,11 +407,13 @@
         let allData = [];
         let currentHeaders = [];
         let visibleHeaders = [];
-        let sortConfig = { column: null, direction: 'asc' };
-        let activeFilters = {};
-        let uniqueValues = {};
+        let sortState = { column: null, direction: null };
+        let activeFilters = {};       // { columna: valorSeleccionado }
 
-        // Eventos
+        // Almacenar los valores únicos (sin filtrar) para cada columna
+        let allUniqueValues = {};
+
+        // ===== EVENTOS DE CARGA =====
         uploadArea.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', handleFile);
 
@@ -497,13 +437,17 @@
         });
 
         restoreFiltersBtn.addEventListener('click', function() {
+            // Resetear todos los filtros
             document.querySelectorAll('.filter-select').forEach(sel => sel.value = '');
             activeFilters = {};
             this.style.display = 'none';
             filterHint.textContent = '🔄 Usa los desplegables para filtrar';
+            // Reconstruir opciones de filtros (todas)
+            updateFilterOptions();
             applyFiltersAndRender();
         });
 
+        // ===== PROCESAR ARCHIVO =====
         function handleFile() {
             const file = fileInput.files[0];
             if (!file) return;
@@ -541,6 +485,7 @@
                     shownColumnsList.textContent = displayList;
                     filterNote.style.display = 'block';
 
+                    // Limpiar datos
                     allData = results.data.map(row => {
                         const newRow = {};
                         filteredHeaders.forEach(h => {
@@ -553,10 +498,11 @@
 
                     currentHeaders = filteredHeaders;
                     visibleHeaders = [...currentHeaders];
-                    sortConfig = { column: null, direction: 'asc' };
+                    sortState = { column: null, direction: null };
                     activeFilters = {};
 
-                    uniqueValues = {};
+                    // Calcular valores únicos (normalizados) para cada columna (sin filtros)
+                    allUniqueValues = {};
                     currentHeaders.forEach(h => {
                         const rawValues = allData.map(row => row[h]).filter(v => v !== null && v !== undefined && v !== '');
                         const normalizedSet = new Set();
@@ -564,7 +510,7 @@
                             const norm = normalizeGroup(String(v));
                             if (norm) normalizedSet.add(norm);
                         });
-                        uniqueValues[h] = Array.from(normalizedSet).sort();
+                        allUniqueValues[h] = Array.from(normalizedSet).sort();
                     });
 
                     buildTable(allData, visibleHeaders);
@@ -577,6 +523,7 @@
             });
         }
 
+        // ===== CONSTRUIR TABLA =====
         function buildTable(data, visibleCols) {
             let tableHtml = '<table><thead><tr>';
             visibleCols.forEach(h => {
@@ -586,14 +533,15 @@
                         <div class="col-header">
                             <div class="col-top">
                                 <span>${displayName}</span>
-                                <div class="sort-group">
-                                    <button class="sort-btn" data-column="${h}" data-direction="asc">▲</button>
-                                    <button class="sort-btn" data-column="${h}" data-direction="desc">▼</button>
-                                </div>
+                                <select class="sort-select" data-column="${h}">
+                                    <option value="">Original</option>
+                                    <option value="asc">▲ Ascendente</option>
+                                    <option value="desc">▼ Descendente</option>
+                                </select>
                             </div>
                             <select class="filter-select" data-column="${h}">
                                 <option value="">Todos</option>
-                                ${(uniqueValues[h] || []).map(val => `<option value="${val}">${val}</option>`).join('')}
+                                ${(allUniqueValues[h] || []).map(val => `<option value="${val}">${val}</option>`).join('')}
                             </select>
                         </div>
                     </th>
@@ -604,20 +552,38 @@
 
             tableWrapper.innerHTML = tableHtml;
 
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+            // --- Eventos del selector de orden ---
+            document.querySelectorAll('.sort-select').forEach(sel => {
+                sel.addEventListener('change', function(e) {
                     const col = this.dataset.column;
-                    const dir = this.dataset.direction;
-                    handleSort(col, dir);
+                    const value = this.value;
+                    if (value !== '') {
+                        document.querySelectorAll('.sort-select').forEach(other => {
+                            if (other !== this) other.value = '';
+                        });
+                    }
+                    if (value === '') {
+                        sortState.column = null;
+                        sortState.direction = null;
+                    } else {
+                        sortState.column = col;
+                        sortState.direction = value;
+                    }
+                    applyFiltersAndRender();
                 });
             });
 
+            // --- Eventos de filtro ---
             document.querySelectorAll('.filter-select').forEach(sel => {
                 sel.addEventListener('change', function(e) {
                     const col = this.dataset.column;
                     const val = this.value;
                     if (val === '') delete activeFilters[col];
                     else activeFilters[col] = val;
+
+                    // Actualizar opciones de los demás filtros (encadenados)
+                    updateFilterOptions();
+
                     const hasFilter = Object.keys(activeFilters).length > 0;
                     restoreFiltersBtn.style.display = hasFilter ? 'inline-block' : 'none';
                     filterHint.textContent = hasFilter ? '✅ Filtros activos' : '🔄 Usa los desplegables para filtrar';
@@ -625,6 +591,13 @@
                 });
             });
 
+            // Cargar estados guardados (si los hay)
+            document.querySelectorAll('.sort-select').forEach(sel => {
+                const col = sel.dataset.column;
+                if (sortState.column === col && sortState.direction) {
+                    sel.value = sortState.direction;
+                }
+            });
             document.querySelectorAll('.filter-select').forEach(sel => {
                 const col = sel.dataset.column;
                 if (activeFilters[col]) sel.value = activeFilters[col];
@@ -633,7 +606,69 @@
             applyFiltersAndRender();
         }
 
+        // ===== ACTUALIZAR OPCIONES DE FILTROS (encadenados) =====
+        function updateFilterOptions() {
+            // Para cada columna, calcular los valores posibles dados los filtros activos (excepto el de sí misma)
+            currentHeaders.forEach(h => {
+                const select = document.querySelector(`.filter-select[data-column="${h}"]`);
+                if (!select) return;
+
+                // Obtener los filtros activos excluyendo la columna actual
+                const otherFilters = { ...activeFilters };
+                delete otherFilters[h];
+
+                // Filtrar los datos según los otros filtros
+                let filteredData = allData.filter(row => {
+                    for (let col in otherFilters) {
+                        const filterVal = otherFilters[col];
+                        if (!filterVal) continue;
+                        const raw = row[col];
+                        if (raw === null || raw === undefined) return false;
+                        const norm = normalizeGroup(String(raw));
+                        if (norm !== filterVal) return false;
+                    }
+                    return true;
+                });
+
+                // Obtener los valores únicos de la columna h en los datos filtrados
+                const values = new Set();
+                filteredData.forEach(row => {
+                    const val = row[h];
+                    if (val !== null && val !== undefined && val !== '') {
+                        const norm = normalizeGroup(String(val));
+                        if (norm) values.add(norm);
+                    }
+                });
+
+                // Si no hay filtros activos, usar todos los valores
+                const finalValues = (Object.keys(otherFilters).length === 0) ? allUniqueValues[h] : Array.from(values).sort();
+
+                // Guardar el valor seleccionado actualmente
+                const currentVal = select.value;
+
+                // Reconstruir opciones
+                let html = `<option value="">Todos</option>`;
+                finalValues.forEach(v => {
+                    html += `<option value="${v}">${v}</option>`;
+                });
+                select.innerHTML = html;
+
+                // Restaurar la selección si aún es válida
+                if (currentVal && finalValues.includes(currentVal)) {
+                    select.value = currentVal;
+                } else {
+                    // Si el valor seleccionado ya no es válido, lo quitamos de activeFilters
+                    if (activeFilters[h] && !finalValues.includes(activeFilters[h])) {
+                        delete activeFilters[h];
+                    }
+                    select.value = '';
+                }
+            });
+        }
+
+        // ===== APLICAR FILTROS Y ORDEN =====
         function applyFiltersAndRender() {
+            // 1. Filtrar
             let filtered = allData.filter(row => {
                 for (let col in activeFilters) {
                     const filterVal = activeFilters[col];
@@ -646,9 +681,10 @@
                 return true;
             });
 
-            if (sortConfig.column) {
-                const col = sortConfig.column;
-                const dir = sortConfig.direction;
+            // 2. Ordenar
+            if (sortState.column && sortState.direction) {
+                const col = sortState.column;
+                const dir = sortState.direction;
                 filtered = [...filtered].sort((a, b) => {
                     let valA = a[col] ?? '';
                     let valB = b[col] ?? '';
@@ -667,19 +703,7 @@
             rowCount.textContent = filtered.length;
         }
 
-        function handleSort(column, direction) {
-            sortConfig.column = column;
-            sortConfig.direction = direction;
-            document.querySelectorAll('.sort-btn').forEach(b => {
-                b.classList.remove('active-asc', 'active-desc');
-                if (b.dataset.column === column) {
-                    if (direction === 'asc') b.classList.add('active-asc');
-                    else b.classList.add('active-desc');
-                }
-            });
-            applyFiltersAndRender();
-        }
-
+        // ===== RENDERIZAR FILAS =====
         function renderRows(data) {
             const tbody = document.getElementById('tableBody');
             if (!tbody) return;
