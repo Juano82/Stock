@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visor CSV Pro - Orden con botón</title>
+    <title>Visor CSV Pro - Orden con ícono</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
@@ -203,7 +203,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
             flex-wrap: wrap;
         }
@@ -215,22 +215,21 @@
             letter-spacing: 0.3px;
             white-space: nowrap;
         }
-        /* ===== BOTÓN DE ORDEN (3 ESTADOS) ===== */
+        /* ===== BOTÓN DE ORDEN SOLO ÍCONO ===== */
         .sort-btn {
             background: white;
             border: 1.5px solid var(--border);
             border-radius: 8px;
-            padding: 4px 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            padding: 4px 8px;
+            font-size: 1.0rem;
+            line-height: 1.2;
             color: var(--text-light);
             cursor: pointer;
             transition: 0.15s;
-            min-width: 70px;
+            min-width: 32px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
             font-family: 'Inter', sans-serif;
         }
         .sort-btn:hover {
@@ -247,9 +246,6 @@
             border-color: #ef4444;
             color: #ef4444;
             background: #fee2e2;
-        }
-        .sort-btn .icon {
-            font-size: 0.9rem;
         }
 
         .filter-select {
@@ -335,9 +331,9 @@
                 padding: 3px 6px;
             }
             .sort-btn {
-                font-size: 0.7rem;
-                padding: 2px 8px;
-                min-width: 60px;
+                font-size: 0.8rem;
+                padding: 2px 6px;
+                min-width: 26px;
             }
             .upload {
                 padding: 4px 12px;
@@ -355,7 +351,7 @@
         <div class="header">
             <div class="header-left">
                 <h1>📊 <span>Visor</span> CSV</h1>
-                <div class="sub">Orden con botón (3 estados) y agrupación mejorada</div>
+                <div class="sub">Orden con botón (3 estados: ⇅, ▲, ▼)</div>
             </div>
             <div class="header-actions">
                 <div class="upload" id="uploadArea">
@@ -384,7 +380,7 @@
             </div>
         </div>
 
-        <div class="footer">Hecho con ❤️ – botón de orden: Original → ▲ Asc → ▼ Desc</div>
+        <div class="footer">Hecho con ❤️ – clic en el ícono para cambiar estado</div>
     </div>
 
     <script>
@@ -405,12 +401,10 @@
                 'stock_location': 'Ubicación'
             };
 
-            // ===== NORMALIZACIÓN AVANZADA PARA AGRUPAR =====
+            // ===== NORMALIZACIÓN AVANZADA =====
             function normalizeGroup(text) {
                 if (!text) return '';
                 let s = String(text).trim().toLowerCase();
-
-                // 1. Eliminar caracteres especiales y palabras irrelevantes
                 s = s.replace(/[^a-z0-9\s]/g, ' ');
                 const removeWords = [
                     'usado', 'usados', '0km', 'modelo', 'version', 'full', 'base', 'plus',
@@ -420,13 +414,8 @@
                 removeWords.forEach(w => {
                     s = s.replace(new RegExp('\\b' + w + '\\b', 'g'), '');
                 });
-
-                // 2. Limpiar espacios extra
                 s = s.replace(/\s+/g, ' ').trim();
-
-                // 3. Mapeo de sinónimos (marcas y modelos)
                 const synonyms = {
-                    // Marcas
                     'vw': 'volkswagen',
                     'volkswagen': 'volkswagen',
                     'ford': 'ford',
@@ -444,7 +433,6 @@
                     'dodge': 'dodge',
                     'cherry': 'cherry',
                     'kangoo': 'renault',
-                    // Modelos comunes
                     'kuga': 'kuga',
                     'ecosport': 'ecosport',
                     'ranger': 'ranger',
@@ -456,30 +444,22 @@
                     'gol': 'gol',
                     'trend': 'gol trend'
                 };
-
                 if (synonyms[s]) return synonyms[s];
-
-                // Buscar si alguna clave está contenida en el texto
                 for (let key in synonyms) {
                     if (s.includes(key)) {
                         return synonyms[key];
                     }
                 }
-
-                // Si es un modelo que termina en número (ej. "focus 1.6") quedarse solo con el nombre
                 const modelMatch = s.match(/^([a-z]+)/);
                 if (modelMatch) {
                     const base = modelMatch[1];
-                    // Si el base es una marca conocida, devolverlo
                     if (['ford', 'nissan', 'renault', 'volkswagen', 'toyota', 'chevrolet', 'hyundai', 'jeep', 'fiat',
                             'peugeot', 'citroen', 'dodge', 'triumph', 'cherry'
                         ].includes(base)) {
                         return base;
                     }
-                    // Si no, devolver el texto limpio
                     return s;
                 }
-
                 return s;
             }
 
@@ -516,7 +496,6 @@
             let allData = [];
             let currentHeaders = [];
             let visibleHeaders = [];
-            // Estado de orden: { column: string | null, direction: 'asc' | 'desc' | null }
             let sortState = { column: null, direction: null };
             let activeFilters = {};
             let allUniqueValues = {};
@@ -549,10 +528,9 @@
                 activeFilters = {};
                 this.style.display = 'none';
                 filterHint.textContent = '🔄 Usa los desplegables para filtrar';
-                // Resetear botones de orden
                 document.querySelectorAll('.sort-btn').forEach(btn => {
                     btn.className = 'sort-btn';
-                    btn.innerHTML = '<span class="icon">⇅</span> Original';
+                    btn.textContent = '⇅';
                 });
                 sortState = { column: null, direction: null };
                 updateFilterOptions();
@@ -645,9 +623,7 @@
                             <div class="col-header">
                                 <div class="col-top">
                                     <span>${displayName}</span>
-                                    <button class="sort-btn" data-column="${h}">
-                                        <span class="icon">⇅</span> Original
-                                    </button>
+                                    <button class="sort-btn" data-column="${h}">⇅</button>
                                 </div>
                                 <select class="filter-select" data-column="${h}">
                                     <option value="">Todos</option>
@@ -662,11 +638,11 @@
 
                 tableWrapper.innerHTML = tableHtml;
 
-                // --- Eventos del botón de orden (3 estados) ---
+                // --- Eventos del botón de orden (ícono) ---
                 document.querySelectorAll('.sort-btn').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         const col = this.dataset.column;
-                        // Ciclo de estados: Original → Asc → Desc → Original
+                        // Ciclo: Original (⇅) → Asc (▲) → Desc (▼) → Original
                         let nextState = 'original';
                         if (sortState.column === col && sortState.direction === 'asc') {
                             nextState = 'desc';
@@ -676,26 +652,25 @@
                             nextState = 'asc';
                         }
 
-                        // Resetear todos los botones a Original
+                        // Resetear todos los botones a ⇅
                         document.querySelectorAll('.sort-btn').forEach(b => {
                             b.className = 'sort-btn';
-                            b.innerHTML = '<span class="icon">⇅</span> Original';
+                            b.textContent = '⇅';
                         });
 
                         if (nextState === 'original') {
                             sortState.column = null;
                             sortState.direction = null;
-                            // El botón se queda en Original (ya lo reseteamos)
+                            // El botón ya está en ⇅
                         } else {
                             sortState.column = col;
                             sortState.direction = nextState;
-                            // Marcar este botón
                             if (nextState === 'asc') {
                                 this.className = 'sort-btn state-asc';
-                                this.innerHTML = '<span class="icon">▲</span> Ascendente';
+                                this.textContent = '▲';
                             } else {
                                 this.className = 'sort-btn state-desc';
-                                this.innerHTML = '<span class="icon">▼</span> Descendente';
+                                this.textContent = '▼';
                             }
                         }
 
@@ -727,10 +702,10 @@
                         if (btn.dataset.column === sortState.column) {
                             if (sortState.direction === 'asc') {
                                 btn.className = 'sort-btn state-asc';
-                                btn.innerHTML = '<span class="icon">▲</span> Ascendente';
+                                btn.textContent = '▲';
                             } else {
                                 btn.className = 'sort-btn state-desc';
-                                btn.innerHTML = '<span class="icon">▼</span> Descendente';
+                                btn.textContent = '▼';
                             }
                         }
                     });
