@@ -3,48 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador CSV - Búsqueda y Orden</title>
+    <title>Visualizador CSV - Filtros por columna</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; font-family: 'Segoe UI', sans-serif; background: #f4f7fc; overflow: hidden; }
-        .container { display: flex; flex-direction: column; height: 100vh; max-width: 100%; background: white; padding: 15px 20px; }
-        .header { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
-        .header h1 { font-weight: 300; font-size: 1.5rem; color: #0b2b44; margin: 0; }
-        .header .subtitle { color: #5e6f88; font-size: 0.85rem; }
-        .upload-area { border: 2px dashed #b9c8dd; border-radius: 10px; padding: 8px 18px; background: #fafcff; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .upload-area:hover { border-color: #3b7cff; background: #f0f6ff; }
-        .upload-area input { display: none; }
-        .upload-label { font-size: 0.9rem; color: #2b4b6f; }
-        .upload-label strong { color: #3b7cff; text-decoration: underline; }
-        .file-name { font-weight: 500; color: #1d3b5c; font-size: 0.85rem; }
-        .filter-note { background: #eef6ff; border-left: 4px solid #3b7cff; padding: 5px 14px; border-radius: 6px; font-size: 0.8rem; color: #1d3b5c; flex-shrink: 0; margin: 4px 0; display: none; }
-        .table-wrapper { flex: 1 1 auto; overflow: auto; border-radius: 10px; border: 1px solid #e3eaf2; background: white; min-height: 0; position: relative; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-        thead { position: sticky; top: 0; z-index: 3; }
-        th { background: #e9eff7; color: #1f3b57; font-weight: 600; padding: 6px 10px; text-align: left; white-space: nowrap; border-bottom: 1px solid #d0dbe8; }
-        .sort-btn { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 0 4px; margin-left: 6px; color: #889bb3; transition: 0.15s; vertical-align: middle; }
-        .sort-btn:hover { color: #3b7cff; }
-        .sort-btn.active-asc { color: #3b7cff; font-weight: bold; }
-        .sort-btn.active-desc { color: #e74c3c; font-weight: bold; }
-        td { padding: 6px 10px; border-bottom: 1px solid #eef3f9; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        tr:hover td { background: #f8fbff; }
-        .footer { flex-shrink: 0; text-align: center; font-size: 0.7rem; color: #889bb3; padding-top: 6px; border-top: 1px solid #e9edf4; margin-top: 6px; }
-        #tableContainer { display: none; flex: 1 1 auto; min-height: 0; flex-direction: column; }
-        #filterNote { display: none; }
-        .warning { background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; flex-shrink: 0; margin: 3px 0; display: none; }
-        .search-box { flex-shrink: 0; margin: 6px 0; display: flex; gap: 8px; align-items: center; }
-        .search-box input { flex: 1; padding: 6px 12px; border: 1px solid #d0dbe8; border-radius: 6px; font-size: 0.85rem; max-width: 300px; }
-        .search-box input:focus { outline: none; border-color: #3b7cff; box-shadow: 0 0 0 2px rgba(59,124,255,0.15); }
-        .clear-search { background: none; border: none; color: #3b7cff; cursor: pointer; font-size: 0.8rem; padding: 0 8px; }
-        .clear-search:hover { text-decoration: underline; }
-        .counter { font-size: 0.8rem; color: #5e6f88; margin-left: 8px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f7fc;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100%;
+            background: white;
+            padding: 15px 20px;
+        }
+        .header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .header h1 {
+            font-weight: 300;
+            font-size: 1.5rem;
+            color: #0b2b44;
+            margin: 0;
+        }
+        .header .subtitle {
+            color: #5e6f88;
+            font-size: 0.85rem;
+        }
+        .upload-area {
+            border: 2px dashed #b9c8dd;
+            border-radius: 10px;
+            padding: 8px 18px;
+            background: #fafcff;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .upload-area:hover {
+            border-color: #3b7cff;
+            background: #f0f6ff;
+        }
+        .upload-area input {
+            display: none;
+        }
+        .upload-label {
+            font-size: 0.9rem;
+            color: #2b4b6f;
+        }
+        .upload-label strong {
+            color: #3b7cff;
+            text-decoration: underline;
+        }
+        .file-name {
+            font-weight: 500;
+            color: #1d3b5c;
+            font-size: 0.85rem;
+        }
+        .filter-note {
+            background: #eef6ff;
+            border-left: 4px solid #3b7cff;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #1d3b5c;
+            flex-shrink: 0;
+            margin: 4px 0;
+            display: none;
+        }
+        /* Fila de filtros (selectores) */
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f8faff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #e3eaf2;
+            flex-shrink: 0;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .filters-row select {
+            padding: 4px 8px;
+            border: 1px solid #d0dbe8;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            background: white;
+            min-width: 80px;
+            max-width: 150px;
+        }
+        .filters-row label {
+            font-size: 0.75rem;
+            color: #4c6a8a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .filters-row .clear-filters-btn {
+            background: none;
+            border: 1px solid #d0dbe8;
+            border-radius: 4px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: #3b7cff;
+            margin-left: 4px;
+        }
+        .filters-row .clear-filters-btn:hover {
+            background: #e9eff7;
+        }
+        .table-wrapper {
+            flex: 1 1 auto;
+            overflow: auto;
+            border-radius: 10px;
+            border: 1px solid #e3eaf2;
+            background: white;
+            min-height: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+        }
+        th {
+            background: #e9eff7;
+            color: #1f3b57;
+            font-weight: 600;
+            padding: 6px 10px;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 1px solid #d0dbe8;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background: #dde6f2;
+        }
+        th .sort-icon {
+            margin-left: 4px;
+            font-size: 0.7rem;
+            color: #889bb3;
+        }
+        td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #eef3f9;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        tr:hover td {
+            background: #f8fbff;
+        }
+        .footer {
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #889bb3;
+            padding-top: 6px;
+            border-top: 1px solid #e9edf4;
+            margin-top: 6px;
+        }
+        #tableContainer {
+            display: none;
+            flex: 1 1 auto;
+            min-height: 0;
+            flex-direction: column;
+        }
+        #filterNote {
+            display: none;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            margin: 3px 0;
+            display: none;
+        }
         @media (max-width: 600px) {
             .container { padding: 8px 10px; }
             .header h1 { font-size: 1.1rem; }
             td { font-size: 0.7rem; padding: 4px 6px; }
             th { font-size: 0.75rem; padding: 4px 6px; }
-            .search-box input { max-width: 150px; font-size: 0.75rem; }
+            .filters-row select { font-size: 0.7rem; padding: 2px 4px; min-width: 60px; }
+            .filters-row label { font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -53,12 +221,14 @@
     <div class="header">
         <div>
             <h1>📊 Visualizador CSV</h1>
-            <span class="subtitle">Buscar en todas las columnas y ordenar con un clic</span>
+            <span class="subtitle">Filtra seleccionando valores en cada columna</span>
         </div>
-        <div class="upload-area" id="uploadArea">
-            <div class="upload-label">📂 <strong>Selecciona</strong> o arrastra CSV</div>
-            <input type="file" id="fileInput" accept=".csv">
-            <span class="file-name" id="fileName"></span>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-label">📂 <strong>Selecciona</strong> o arrastra CSV</div>
+                <input type="file" id="fileInput" accept=".csv">
+                <span class="file-name" id="fileName"></span>
+            </div>
         </div>
     </div>
 
@@ -67,29 +237,25 @@
     </div>
     <div id="warningMessage" class="warning">⚠️ Más de 5000 filas – el rendimiento puede verse afectado.</div>
 
-    <!-- Búsqueda global -->
-    <div class="search-box" id="searchBox" style="display:none;">
-        <input type="text" id="searchInput" placeholder="🔍 Buscar en todas las columnas...">
-        <span class="counter" id="rowCounter"></span>
-        <button class="clear-search" id="clearSearch">✕</button>
-    </div>
-
     <div id="tableContainer">
+        <!-- Fila de filtros (selectores) -->
+        <div id="filtersRow" class="filters-row"></div>
         <div class="table-wrapper" id="tableWrapper">
             <!-- Tabla generada con JS -->
         </div>
     </div>
 
-    <div class="footer">Hecho con ❤️ – búsqueda global y orden por columna</div>
+    <div class="footer">Hecho con ❤️ – filtros por columna + orden al hacer clic en el encabezado</div>
 </div>
 
 <script>
     (function() {
-        // Columnas y nombres
+        // ---------- COLUMNAS Y NOMBRES ----------
         const TARGET_COLUMNS = [
             'stock_brand', 'stock_model_version', 'stock_version', 'stock_domain',
             'stock_used_year', 'stock_color', 'stock_vehicle_kms', 'stock_location'
         ];
+
         const DISPLAY_NAMES = {
             'stock_brand': 'Marca',
             'stock_model_version': 'Modelo',
@@ -101,7 +267,7 @@
             'stock_location': 'Ubicación'
         };
 
-        // Limpieza
+        // ---------- LIMPIEZA ----------
         function cleanText(str) {
             if (!str) return '';
             let s = String(str).trim().toLowerCase();
@@ -121,7 +287,7 @@
             return s.replace(/\s+/g, ' ').trim();
         }
 
-        // DOM
+        // ---------- DOM ----------
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
         const fileName = document.getElementById('fileName');
@@ -130,15 +296,13 @@
         const filterNote = document.getElementById('filterNote');
         const shownColumnsList = document.getElementById('shownColumnsList');
         const warningMessage = document.getElementById('warningMessage');
-        const searchInput = document.getElementById('searchInput');
-        const searchBox = document.getElementById('searchBox');
-        const rowCounter = document.getElementById('rowCounter');
-        const clearSearch = document.getElementById('clearSearch');
+        const filtersRow = document.getElementById('filtersRow');
 
         let allData = [];
         let currentHeaders = [];
+        let visibleHeaders = [];
         let sortConfig = { column: null, direction: 'asc' };
-        let searchTerm = '';
+        let filterValues = {};  // clave: nombre columna, valor: string seleccionado ('' = todos)
 
         uploadArea.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', handleFile);
@@ -160,18 +324,6 @@
                 fileInput.files = e.dataTransfer.files;
                 handleFile();
             }
-        });
-
-        // Eventos de búsqueda
-        searchInput.addEventListener('input', function() {
-            searchTerm = this.value.trim().toLowerCase();
-            applyFiltersAndSort();
-        });
-
-        clearSearch.addEventListener('click', function() {
-            searchInput.value = '';
-            searchTerm = '';
-            applyFiltersAndSort();
         });
 
         function handleFile() {
@@ -214,6 +366,7 @@
                     shownColumnsList.textContent = displayList;
                     filterNote.style.display = 'block';
 
+                    // Limpiar datos
                     allData = results.data.map(row => {
                         const newRow = {};
                         filteredHeaders.forEach(h => {
@@ -225,13 +378,18 @@
                         });
                         return newRow;
                     });
-                    currentHeaders = filteredHeaders;
-                    sortConfig = { column: null, direction: 'asc' };
-                    searchTerm = '';
-                    searchInput.value = '';
-                    searchBox.style.display = 'flex';
 
-                    buildTable(allData, currentHeaders);
+                    currentHeaders = filteredHeaders;
+                    visibleHeaders = [...currentHeaders];
+                    sortConfig = { column: null, direction: 'asc' };
+                    filterValues = {};
+                    // Inicializar filtros vacíos
+                    currentHeaders.forEach(h => filterValues[h] = '');
+
+                    // Construir los selectores de filtro
+                    buildFilters(allData, currentHeaders);
+                    // Construir la tabla
+                    buildTable(allData, visibleHeaders);
                     tableContainer.style.display = 'flex';
                 },
                 error: function(error) {
@@ -240,62 +398,85 @@
             });
         }
 
-        function buildTable(data, headers) {
-            let tableHtml = '<table><thead><tr>';
+        // ---------- CONSTRUIR FILTROS (SELECTORES) ----------
+        function buildFilters(data, headers) {
+            filtersRow.innerHTML = '';
+            // Para cada columna, obtener valores únicos y crear select
             headers.forEach(h => {
                 const displayName = DISPLAY_NAMES[h] || h;
-                tableHtml += `<th>${displayName} 
-                    <button class="sort-btn" data-column="${h}">↕</button>
-                </th>`;
-            });
-            tableHtml += '</tr></thead><tbody id="tableBody">';
-            tableHtml += '</tbody></table>';
-
-            tableWrapper.innerHTML = tableHtml;
-
-            // Eventos de orden
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const col = this.dataset.column;
-                    toggleSort(col);
-                });
-            });
-
-            applyFiltersAndSort();
-        }
-
-        function toggleSort(column) {
-            if (sortConfig.column === column) {
-                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortConfig.column = column;
-                sortConfig.direction = 'asc';
-            }
-            applyFiltersAndSort();
-        }
-
-        function applyFiltersAndSort() {
-            // Filtrar
-            let filtered = allData;
-            if (searchTerm) {
-                filtered = allData.filter(row => {
-                    for (let h of currentHeaders) {
-                        let val = row[h];
-                        if (val !== null && val !== undefined) {
-                            if (String(val).toLowerCase().includes(searchTerm)) {
-                                return true;
-                            }
-                        }
+                // Obtener valores únicos no nulos
+                const uniqueValues = new Set();
+                data.forEach(row => {
+                    const val = row[h];
+                    if (val !== null && val !== undefined && val !== '') {
+                        uniqueValues.add(String(val));
                     }
-                    return false;
                 });
-            }
+                const sortedValues = Array.from(uniqueValues).sort((a, b) => a.localeCompare(b));
 
-            // Ordenar
+                const label = document.createElement('label');
+                label.innerHTML = `${displayName}: `;
+
+                const select = document.createElement('select');
+                // Opción "Todos"
+                const allOption = document.createElement('option');
+                allOption.value = '';
+                allOption.textContent = 'Todos';
+                select.appendChild(allOption);
+
+                sortedValues.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    select.appendChild(opt);
+                });
+
+                // Evento cambio
+                select.addEventListener('change', function() {
+                    filterValues[h] = this.value;
+                    applyFiltersAndRender();
+                });
+
+                label.appendChild(select);
+                filtersRow.appendChild(label);
+            });
+
+            // Botón para limpiar todos los filtros
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'clear-filters-btn';
+            clearBtn.textContent = '✕ Limpiar filtros';
+            clearBtn.addEventListener('click', function() {
+                // Resetear todos los selects a "Todos"
+                const selects = filtersRow.querySelectorAll('select');
+                selects.forEach(sel => sel.value = '');
+                // Resetear filterValues
+                headers.forEach(h => filterValues[h] = '');
+                applyFiltersAndRender();
+            });
+            filtersRow.appendChild(clearBtn);
+        }
+
+        // ---------- APLICAR FILTROS Y RENDERIZAR ----------
+        function applyFiltersAndRender() {
+            // Filtrar datos según filterValues
+            const filteredData = allData.filter(row => {
+                for (let h of currentHeaders) {
+                    const filterVal = filterValues[h] || '';
+                    if (filterVal === '') continue;
+                    const cellVal = row[h] !== null && row[h] !== undefined ? String(row[h]) : '';
+                    if (cellVal !== filterVal) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            // Aplicar ordenamiento (si existe)
+            let sortedData = filteredData;
             if (sortConfig.column) {
                 const col = sortConfig.column;
                 const dir = sortConfig.direction;
-                filtered = [...filtered].sort((a, b) => {
+                sortedData = [...filteredData].sort((a, b) => {
                     let valA = a[col] ?? '';
                     let valB = b[col] ?? '';
                     if (typeof valA === 'number' && typeof valB === 'number') {
@@ -309,41 +490,66 @@
                 });
             }
 
-            // Actualizar contador
-            rowCounter.textContent = `${filtered.length} filas${allData.length !== filtered.length ? ` (de ${allData.length})` : ''}`;
+            renderRows(sortedData);
+        }
 
-            // Renderizar
-            renderRows(filtered);
+        // ---------- CONSTRUIR TABLA CON ORDEN AL CLIC EN ENCABEZADO ----------
+        function buildTable(data, visibleCols) {
+            let tableHtml = '<table><thead><tr>';
+            visibleCols.forEach(h => {
+                const displayName = DISPLAY_NAMES[h] || h;
+                tableHtml += `<th data-column="${h}">${displayName} <span class="sort-icon">↕</span></th>`;
+            });
+            tableHtml += '</tr></thead><tbody id="tableBody">';
+            tableHtml += '</tbody></table>';
 
-            // Actualizar botones de orden
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.classList.remove('active-asc', 'active-desc');
-                const col = btn.dataset.column;
-                if (col === sortConfig.column) {
-                    if (sortConfig.direction === 'asc') {
-                        btn.classList.add('active-asc');
-                        btn.textContent = '▲';
+            tableWrapper.innerHTML = tableHtml;
+
+            // Evento de orden al hacer clic en el encabezado
+            document.querySelectorAll('thead th').forEach(th => {
+                th.addEventListener('click', function() {
+                    const col = this.dataset.column;
+                    // Alternar dirección
+                    if (sortConfig.column === col) {
+                        sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
                     } else {
-                        btn.classList.add('active-desc');
-                        btn.textContent = '▼';
+                        sortConfig.column = col;
+                        sortConfig.direction = 'asc';
                     }
+                    applyFiltersAndRender();
+                    // Actualizar ícono de orden
+                    updateSortIcons(col);
+                });
+            });
+
+            renderRows(data);
+        }
+
+        // ---------- ACTUALIZAR ICONOS DE ORDEN ----------
+        function updateSortIcons(activeCol) {
+            document.querySelectorAll('thead th .sort-icon').forEach(icon => {
+                const th = icon.closest('th');
+                const col = th.dataset.column;
+                if (col === activeCol) {
+                    icon.textContent = sortConfig.direction === 'asc' ? ' ▲' : ' ▼';
                 } else {
-                    btn.textContent = '↕';
+                    icon.textContent = ' ↕';
                 }
             });
         }
 
+        // ---------- RENDERIZAR FILAS ----------
         function renderRows(data) {
             const tbody = document.getElementById('tableBody');
             if (!tbody) return;
 
             let html = '';
             if (data.length === 0) {
-                html = `<tr><td colspan="${currentHeaders.length}" style="text-align:center; padding:20px; color:#889bb3;">No se encontraron resultados</td></tr>`;
+                html = `<tr><td colspan="${visibleHeaders.length}" style="text-align:center; padding:20px; color:#889bb3;">No hay datos que coincidan con los filtros</td></tr>`;
             } else {
                 data.forEach(row => {
                     html += '<tr>';
-                    currentHeaders.forEach(h => {
+                    visibleHeaders.forEach(h => {
                         let val = row[h];
                         if (val === null || val === undefined) val = '';
                         let str = String(val);
@@ -354,7 +560,13 @@
                 });
             }
             tbody.innerHTML = html;
+
+            // Actualizar íconos de orden si hay columna activa
+            if (sortConfig.column) {
+                updateSortIcons(sortConfig.column);
+            }
         }
+
     })();
 </script>
 </body>
